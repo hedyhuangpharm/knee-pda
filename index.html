@@ -5,6 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>治療退化性膝關節炎 - 病患決策輔助工具 (AI增強版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#28839B',
+                            600: '#1e6b7a',
+                            700: '#1a5a68',
+                            800: '#164e5c',
+                            900: '#0f3744'
+                        },
+                        ha: {
+                            50: '#f0fcff',
+                            100: '#e0f8ff',
+                            200: '#b8f0ff',
+                            300: '#7de4ff',
+                            400: '#36d5ff',
+                            500: '#0097B2',
+                            600: '#007a94',
+                            700: '#006479',
+                            800: '#005364',
+                            900: '#004455'
+                        },
+                        prp: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#0081CC',
+                            600: '#0066a3',
+                            700: '#00538a',
+                            800: '#004471',
+                            900: '#00385f'
+                        },
+                        combo: {
+                            50: '#ecfccb',
+                            100: '#d9f99d',
+                            200: '#bef264',
+                            300: '#a3e635',
+                            400: '#84cc16',
+                            500: '#10BB82',
+                            600: '#0d9668',
+                            700: '#0a7c57',
+                            800: '#086647',
+                            900: '#06553a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -17,7 +75,7 @@
         .loader {
             border: 4px solid #f3f3f3;
             border-radius: 50%;
-            border-top: 4px solid #3498db;
+            border-top: 4px solid #28839B;
             width: 24px;
             height: 24px;
             animation: spin 2s linear infinite;
@@ -26,13 +84,10 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .tts-button.playing {
-            color: #3b82f6; /* blue-500 */
-        }
         .tab-button.active {
-            border-color: #3b82f6; /* blue-500 */
-            color: #3b82f6;
-            background-color: #eff6ff; /* blue-50 */
+            border-color: #28839B;
+            color: #28839B;
+            background-color: #f0f9ff;
         }
         .person-icon.highlight {
             fill: #ef4444; /* red-500 */
@@ -41,9 +96,9 @@
             transition: all 0.2s ease-in-out;
         }
         .radio-label:has(input:checked) {
-            background-color: #dbeafe; /* blue-100 */
-            border-color: #3b82f6; /* blue-500 */
-            color: #1e40af; /* blue-800 */
+            background-color: #e0f2fe;
+            border-color: #28839B;
+            color: #0f3744;
         }
         /* Drag and Drop Styles */
         .draggable {
@@ -51,16 +106,86 @@
             user-select: none;
         }
         .dragging {
-            opacity: 0.5;
-            background: #e0e7ff;
+            opacity: 0.7;
+            background: #e0f2fe;
+            transform: rotate(3deg) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border: 2px dashed #28839B;
+            z-index: 1000;
+        }
+        
+        /* Mobile responsive improvements */
+        @media (max-width: 768px) {
+            .draggable {
+                cursor: grab;
+                touch-action: none;
+                user-select: none;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+            }
+            
+            .draggable:active {
+                cursor: grabbing;
+            }
+            
+            /* Enhanced mobile touch feedback */
+            .draggable {
+                min-height: 60px; /* Larger touch targets */
+                padding: 12px 16px;
+            }
+            
+            .dragging {
+                animation: pulse 0.6s ease-in-out infinite alternate;
+            }
+            
+            @keyframes pulse {
+                from { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
+                to { box-shadow: 0 12px 35px rgba(40, 131, 155, 0.3); }
+            }
+            
+            
+            nav h1 {
+                font-size: 1rem;
+            }
+            
+            .grid.md\:grid-cols-3 > div {
+                margin-bottom: 1rem;
+            }
+        }
+        
+        /* Improved focus states */
+        .radio-label:focus-within {
+            box-shadow: 0 0 0 2px rgba(40, 131, 155, 0.5);
+        }
+        
+        /* Loading states */
+        .btn-loading {
+            position: relative;
+            color: transparent;
+        }
+        
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
         /* Knowledge Check Button Styles */
         .check-btn.selected {
-            background-color: #3b82f6;
+            background-color: #28839B;
             color: white;
         }
         .ha-type-button.active {
-            background-color: #3b82f6;
+            background-color: #28839B;
             color: white;
         }
          .ha-type-button:not(.active) {
@@ -87,13 +212,33 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
-    <div id="main-content">
+    <!-- Progress Indicator -->
+    <div id="progress-bar" class="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
+        <div class="h-full bg-primary-500 transition-all duration-300 ease-out" style="width: 0%"></div>
+    </div>
+    
+    <!-- Navigation Bar -->
+    <nav class="fixed top-1 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100">
+        <div class="max-w-6xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <h1 class="text-lg font-semibold text-primary-600">治療決策輔助工具</h1>
+                <div class="flex items-center gap-4">
+                    <div class="hidden md:flex items-center gap-2 text-sm text-gray-600">
+                        <span>進度:</span>
+                        <span id="progress-text" class="font-medium text-primary-600">1/7</span>
+                    </div>
+                    <button id="back-btn" class="hidden px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-full transition">← 上一步</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div id="main-content" class="pt-16">
         <!-- Part 1: Welcome & Introduction -->
         <section id="welcome" class="min-h-screen flex flex-col items-center justify-center bg-white p-6 text-center">
             <div class="max-w-3xl mx-auto">
-                <div class="flex items-center justify-center gap-4">
-                    <h1 class="text-4xl md:text-5xl font-bold text-blue-600">治療退化性膝關節炎</h1>
-                    <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="welcome-text">🔊</button>
+                <div class="flex items-center justify-center">
+                    <h1 class="text-4xl md:text-5xl font-bold text-primary-500">治療退化性膝關節炎</h1>
                 </div>
                 <h2 class="text-2xl md:text-3xl font-semibold text-gray-700 mb-8">我該接受膝關節腔內注射治療嗎？</h2>
                 
@@ -114,8 +259,8 @@
                         </p>
                     </div>
 
-                     <div class="text-left bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg shadow-sm mt-6">
-                        <h3 class="font-bold text-xl mb-3 text-blue-800">適用對象</h3>
+                     <div class="text-left bg-primary-50 border-l-4 border-primary-500 p-6 rounded-lg shadow-sm mt-6">
+                        <h3 class="font-bold text-xl mb-3 text-primary-800">適用對象</h3>
                         <p class="text-base md:text-lg">
                             當醫師診斷您確定患有「退化性膝關節炎」，已接受過減重、復健運動、口服/局部外用藥物或類固醇注射治療，但仍無法有效改善疼痛，且目前不考慮置換人工關節之病人。
                         </p>
@@ -124,7 +269,7 @@
             </div>
 
             <div class="mt-12">
-                <a href="#section-2" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                <a href="#section-2" class="bg-primary-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-primary-600 transition-transform transform hover:scale-105 shadow-lg">
                     開始探索
                 </a>
             </div>
@@ -133,9 +278,8 @@
         <!-- Part 2: What is Degenerative Knee Arthritis? -->
         <section id="section-2" class="bg-white py-16 px-4 md:px-8">
             <div class="max-w-4xl mx-auto">
-                <div class="flex items-center justify-center gap-4 mb-10">
+                <div class="flex items-center justify-center mb-10">
                     <h2 class="text-3xl font-bold text-center text-gray-800">什麼是退化性膝關節炎？</h2>
-                    <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="arthritis-info">🔊</button>
                 </div>
                 
                 <div id="arthritis-info">
@@ -148,8 +292,8 @@
                                 onerror="this.onerror=null; this.src='https://placehold.co/400x600/e2e8f0/64748b?text=%E5%9C%96%E7%89%87%E8%BC%89%E5%85%A5%E5%A4%B1%E6%95%97';">
                         </div>
                         <div class="text-gray-700 space-y-4">
-                            <p class="text-lg">退化性膝關節炎是常見的老年退化疾病，國內盛行率約15%，主因為<span class="font-semibold text-blue-600">關節軟骨磨損</span>。軟骨受損<span class="font-semibold text-blue-600">不可逆</span>，症狀會<span class="font-semibold text-blue-600">隨時間惡化</span>，常見表現為<span class="font-semibold text-blue-600">疼痛</span>、<span class="font-semibold text-blue-600">腫脹</span>與<span class="font-semibold text-blue-600">發熱</span>。</p>
-                            <p class="text-lg">由於<span class="font-semibold text-blue-600">關節腔間距狹小</span>，導致骨頭間摩擦增加，進一步加劇疼痛。</p>
+                            <p class="text-lg">退化性膝關節炎是常見的老年退化疾病，國內盛行率約15%，主因為<span class="font-semibold text-primary-600">關節軟骨磨損</span>。軟骨受損<span class="font-semibold text-primary-600">不可逆</span>，症狀會<span class="font-semibold text-primary-600">隨時間惡化</span>，常見表現為<span class="font-semibold text-primary-600">疼痛</span>、<span class="font-semibold text-primary-600">腫脹</span>與<span class="font-semibold text-primary-600">發熱</span>。</p>
+                            <p class="text-lg">由於<span class="font-semibold text-primary-600">關節腔間距狹小</span>，導致骨頭間摩擦增加，進一步加劇疼痛。</p>
                             <div class="text-lg bg-gray-100 p-4 rounded-lg">
                                 <p class="font-semibold">治療以緩解症狀、維持功能為目標，可採：</p>
                                 <ul class="list-disc list-inside mt-2 space-y-1">
@@ -158,12 +302,12 @@
                                     <li>急性期關節內注射類固醇短期消炎止痛</li>
                                 </ul>
                             </div>
-                             <p class="text-lg pt-2">當症狀控制不佳時，可考慮<span class="font-semibold text-blue-600">關節內注射玻尿酸</span>或<span class="font-semibold text-blue-600">高濃度血小板血漿製劑(PRP)</span>，或最後進行人工關節置換。</p>
+                             <p class="text-lg pt-2">當症狀控制不佳時，可考慮<span class="font-semibold text-primary-600">關節內注射玻尿酸</span>或<span class="font-semibold text-primary-600">高濃度血小板血漿製劑(PRP)</span>，或最後進行人工關節置換。</p>
                         </div>
                     </div>
                 </div>
                 <div class="text-center mt-12">
-                    <a href="#section-3" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                    <a href="#section-3" class="bg-primary-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-primary-600 transition-transform transform hover:scale-105 shadow-lg">
                         了解注射治療選項
                     </a>
                 </div>
@@ -173,9 +317,8 @@
         <!-- Part 3: Treatment Options -->
         <section id="section-3" class="bg-gray-50 py-16 px-4 md:px-8">
             <div class="max-w-4xl mx-auto">
-                <div class="flex items-center justify-center gap-4 mb-10">
+                <div class="flex items-center justify-center mb-10">
                     <h2 class="text-3xl font-bold text-center text-gray-800">膝關節腔內注射治療選項</h2>
-                     <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="treatment-options-content">🔊</button>
                 </div>
 
                 <div class="mb-8 flex justify-center border-b border-gray-200">
@@ -186,9 +329,9 @@
 
                 <div id="treatment-options-content">
                     <div id="ha-content" class="tab-content bg-white p-8 rounded-xl shadow-md">
-                        <h3 class="text-2xl font-bold mb-4 text-blue-700">關節潤滑保護製劑 (玻尿酸)</h3>
-                        <p class="text-lg mb-6">玻尿酸是關節滑液中天然存在的黏彈物質，可提供<span class="font-semibold text-blue-600">關節潤滑</span>與<span class="font-semibold text-blue-600">減震</span>作用。透過將玻尿酸直接注射到膝關節腔，可<span class="font-semibold text-blue-600">暫時補充</span>關節滑液、減少骨頭間的摩擦，也有<span class="font-semibold text-blue-600">抑制發炎</span>及<span class="font-semibold text-blue-600">保護軟骨</span>的效果。</p>
-                        <p class="text-lg mb-6">常見的副作用為<span class="font-semibold text-blue-600">注射部位短暫疼痛</span>，冰敷通常可以緩解。本院現有的玻尿酸注射劑型，依其成分結構，大致可分為兩類。每年治療花費約 6,000至8,000元，<span class="font-semibold text-blue-600">健保僅有條件給付</span>，故多數病人仍需<span class="font-semibold text-blue-600">自費使用</span>。</p>
+                        <h3 class="text-2xl font-bold mb-4 text-ha-700">關節潤滑保護製劑 (玻尿酸)</h3>
+                        <p class="text-lg mb-6">玻尿酸是關節滑液中天然存在的黏彈物質，可提供<span class="font-semibold text-ha-600">關節潤滑</span>與<span class="font-semibold text-ha-600">減震</span>作用。透過將玻尿酸直接注射到膝關節腔，可<span class="font-semibold text-ha-600">暫時補充</span>關節滑液、減少骨頭間的摩擦，也有<span class="font-semibold text-ha-600">抑制發炎</span>及<span class="font-semibold text-ha-600">保護軟骨</span>的效果。</p>
+                        <p class="text-lg mb-6">常見的副作用為<span class="font-semibold text-ha-600">注射部位短暫疼痛</span>，冰敷通常可以緩解。本院現有的玻尿酸注射劑型，依其成分結構，大致可分為兩類。每年治療花費約 6,000至8,000元，<span class="font-semibold text-ha-600">健保僅有條件給付</span>，故多數病人仍需<span class="font-semibold text-ha-600">自費使用</span>。</p>
                         <div class="bg-gray-100 rounded-lg p-6">
                             <div class="flex flex-wrap justify-center gap-4 mb-6">
                                 <button class="ha-type-button active py-2 px-5 rounded-full" data-ha-type="low">低分子量 (非交聯)</button>
@@ -200,20 +343,20 @@
                         </div>
                     </div>
                     <div id="prp-content" class="tab-content hidden bg-white p-8 rounded-xl shadow-md">
-                        <h3 class="text-2xl font-bold mb-4 text-green-700">高濃度血小板血漿製劑 (PRP)</h3>
-                        <p class="text-lg mb-4">高濃度血小板血漿製劑 (Platelet-Rich Plasma, PRP)是抽取<span class="font-semibold text-green-600">少量病人的靜脈血</span>，經離心濃縮後，取得含<span class="font-semibold text-green-600">高濃度血小板</span>與<span class="font-semibold text-green-600">生長因子</span>的血漿，再回注膝關節。PRP富含多種生長因子，有<span class="font-semibold text-green-600">抗發炎</span>、促進<span class="font-semibold text-green-600">血管新生</span>、<span class="font-semibold text-green-600">軟組織修復</span>的功能。</p>
+                        <h3 class="text-2xl font-bold mb-4 text-prp-700">高濃度血小板血漿製劑 (PRP)</h3>
+                        <p class="text-lg mb-4">高濃度血小板血漿製劑 (Platelet-Rich Plasma, PRP)是抽取<span class="font-semibold text-prp-600">少量病人的靜脈血</span>，經離心濃縮後，取得含<span class="font-semibold text-prp-600">高濃度血小板</span>與<span class="font-semibold text-prp-600">生長因子</span>的血漿，再回注膝關節。PRP富含多種生長因子，有<span class="font-semibold text-prp-600">抗發炎</span>、促進<span class="font-semibold text-prp-600">血管新生</span>、<span class="font-semibold text-prp-600">軟組織修復</span>的功能。</p>
                         <p class="text-lg mb-4">建議療程將依病人的症狀，執行1-3次的治療注射, 每次間隔2-4週。</p>
-                        <p class="text-lg mb-4">PRP治療由於是採用病人自體血液離心，故不會有過敏之風險。副作用多為<span class="font-semibold text-green-600">注射部位短暫疼痛</span>，冰敷通常可以緩解。</p>
+                        <p class="text-lg mb-4">PRP治療由於是採用病人自體血液離心，故不會有過敏之風險。副作用多為<span class="font-semibold text-prp-600">注射部位短暫疼痛</span>，冰敷通常可以緩解。</p>
                         <div class="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-4 rounded-r-lg">
                             <p class="font-semibold">請注意：</p>
                             <p>PRP並非適用所有病人，若您有血小板功能或凝血功能異常、使用抗凝血劑、患有感染或免疫系統疾病，皆不建議進行PRP治療。單次治療約15,000-20,000元，目前健保並未給付。</p>
                         </div>
                     </div>
                     <div id="combo-content" class="tab-content hidden bg-white p-8 rounded-xl shadow-md">
-                        <h3 class="text-2xl font-bold mb-4 text-purple-700">玻尿酸合併高濃度血小板血漿製劑</h3>
-                        <p class="text-lg mb-4">玻尿酸提供關節潤滑與減震作用，而PRP內含豐富生長因子，可調節發炎並促進軟骨細胞修復。兩者合併時，玻尿酸的<span class="font-semibold text-purple-600">高黏度特性</span>可<span class="font-semibold text-purple-600">延長PRP在關節內的停留</span>，讓生長因子持續釋放。</p>
+                        <h3 class="text-2xl font-bold mb-4 text-combo-700">玻尿酸合併高濃度血小板血漿製劑</h3>
+                        <p class="text-lg mb-4">玻尿酸提供關節潤滑與減震作用，而PRP內含豐富生長因子，可調節發炎並促進軟骨細胞修復。兩者合併時，玻尿酸的<span class="font-semibold text-combo-600">高黏度特性</span>可<span class="font-semibold text-combo-600">延長PRP在關節內的停留</span>，讓生長因子持續釋放。</p>
                         <p class="text-lg mb-4">建議療程將依病人的症狀，執行1-3次的治療注射，每次間隔2-4週。</p>
-                        <p class="text-lg mb-6">副作用多為<span class="font-semibold text-purple-600">注射部位短暫疼痛</span>，冰敷通常可以緩解。</p>
+                        <p class="text-lg mb-6">副作用多為<span class="font-semibold text-combo-600">注射部位短暫疼痛</span>，冰敷通常可以緩解。</p>
                         <div class="bg-indigo-50 border-l-4 border-indigo-400 text-indigo-800 p-4 rounded-r-lg">
                             <p class="font-semibold">關於費用：</p>
                             <p>本院目前備有一針型的混合注射產品，單次治療約需35,000-40,000元。</p>
@@ -221,7 +364,7 @@
                     </div>
                 </div>
                  <div class="text-center mt-12">
-                    <a href="#section-3-5" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                    <a href="#section-3-5" class="bg-primary-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-primary-600 transition-transform transform hover:scale-105 shadow-lg">
                         下一步：做出初步選擇
                     </a>
                 </div>
@@ -231,23 +374,24 @@
         <!-- Part 3.5: Preliminary Choice -->
         <section id="section-3-5" class="bg-white py-16 px-4 md:px-8">
             <div class="max-w-2xl mx-auto">
-                <div class="flex items-center justify-center gap-4 mb-10">
+                <div class="flex items-center justify-center mb-10">
                     <h2 class="text-3xl font-bold text-center text-gray-800">您目前比較想要選擇的治療選項</h2>
-                     <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="preliminary-choice-content">🔊</button>
                 </div>
                 <div id="preliminary-choice-content">
-                    <p class="text-center text-lg text-gray-600 mb-8">在看過基本介紹後，請依您的第一直覺，選擇一個目前比較偏好的治療選項。這不是最終決定，只是幫助您釐清想法的第一步。</p>
+                    <div class="bg-primary-50 border-l-4 border-primary-500 p-4 rounded-r-lg mb-8">
+                        <p class="text-lg text-primary-800">在看過基本介紹後，請依您的第一直覺，選擇一個目前比較偏好的治療選項。這不是最終決定，只是幫助您釐清想法的第一步。</p>
+                    </div>
                     <div class="space-y-4">
                         <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
-                            <input type="radio" name="preliminary-choice" value="ha" class="h-5 w-5 text-blue-600 focus:ring-blue-500">
+                            <input type="radio" name="preliminary-choice" value="ha" class="h-5 w-5 text-ha-600 focus:ring-ha-500">
                             <span class="ml-4 text-xl font-medium text-gray-800">關節潤滑保護製劑 (玻尿酸)</span>
                         </label>
                         <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
-                            <input type="radio" name="preliminary-choice" value="prp" class="h-5 w-5 text-green-600 focus:ring-green-500">
+                            <input type="radio" name="preliminary-choice" value="prp" class="h-5 w-5 text-prp-600 focus:ring-prp-500">
                             <span class="ml-4 text-xl font-medium text-gray-800">高濃度血小板血漿製劑 (PRP)</span>
                         </label>
                         <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
-                            <input type="radio" name="preliminary-choice" value="combo" class="h-5 w-5 text-purple-600 focus:ring-purple-500">
+                            <input type="radio" name="preliminary-choice" value="combo" class="h-5 w-5 text-combo-600 focus:ring-combo-500">
                             <span class="ml-4 text-xl font-medium text-gray-800">玻尿酸合併高濃度血小板血漿製劑</span>
                         </label>
                         <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
@@ -257,7 +401,7 @@
                     </div>
                 </div>
                 <div class="text-center mt-12">
-                    <a href="#section-4" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                    <a href="#section-4" class="bg-primary-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-primary-600 transition-transform transform hover:scale-105 shadow-lg">
                         下一步：比較療效與副作用
                     </a>
                 </div>
@@ -267,35 +411,39 @@
         <!-- Part 4: Efficacy and Side Effects Comparison -->
         <section id="section-4" class="bg-gray-50 py-16 px-4 md:px-8">
             <div class="max-w-6xl mx-auto">
-                <div class="flex items-center justify-center gap-4 mb-10">
+                <div class="flex items-center justify-center mb-10">
                     <h2 class="text-3xl font-bold text-center text-gray-800">治療選項的療效與副作用</h2>
-                    <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="comparison-content-wrapper">🔊</button>
                 </div>
                 <div id="comparison-content-wrapper">
-                    <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">這裡我們將三種治療選項的「療效」與「副作用」分開呈現，幫助您更清楚地比較。您可以上下對照，看看同一個治療選項在兩方面的表現。</p>
+                    <div class="bg-primary-50 border border-primary-200 rounded-lg p-6 mb-12 max-w-4xl mx-auto">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-sm">i</div>
+                            <p class="text-lg text-primary-800">這裡我們將三種治療選項的「療效」與「副作用」分開呈現，幫助您更清楚地比較。您可以上下對照，看看同一個治療選項在兩方面的表現。</p>
+                        </div>
+                    </div>
                     <div class="space-y-12">
                         <!-- Efficacy Row -->
                         <div>
                             <h3 class="text-2xl font-bold text-center text-gray-700 mb-6">療效比較 (疼痛改善效果)</h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-500 flex flex-col"><h4 class="text-xl font-bold text-blue-700 text-center mb-4">玻尿酸</h4><p class="text-sm text-gray-600 mb-2">6個月時，有 <span class="font-bold">86-91%</span> 機會達大幅改善。</p><div class="w-full bg-gray-200 rounded-full h-4 mb-4"><div class="bg-blue-500 h-4 rounded-full" style="width: 88%"></div></div><p class="text-sm text-gray-600 mt-2 mb-2">12個月時，效果減弱，有 <span class="font-bold">52-72%</span> 機會維持輕至中等改善。</p><div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-blue-400 h-4 rounded-full" style="width: 62%"></div></div></div>
-                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500 flex flex-col"><h4 class="text-xl font-bold text-green-700 text-center mb-4">高濃度血小板血漿 (PRP)</h4><p class="text-sm text-gray-600 mb-2">6-12個月，有約 <span class="font-bold">96%</span> 機會維持大幅改善。</p><div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-green-500 h-4 rounded-full" style="width: 96%"></div></div></div>
-                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-purple-500 flex flex-col"><h4 class="text-xl font-bold text-purple-700 text-center mb-4">玻尿酸 + PRP</h4><p class="text-sm text-gray-600 mb-2">6-12個月，有 <span class="font-bold">93-95%</span> 機會維持大幅改善。</p><div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-purple-500 h-4 rounded-full" style="width: 94%"></div></div></div>
+                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-ha-500 flex flex-col hover:shadow-lg transition-shadow"><h4 class="text-xl font-bold text-ha-700 text-center mb-4">玻尿酸</h4><p class="text-sm text-gray-600 mb-2">6個月時，有 <span class="font-bold">86-91%</span> 機會達大幅改善。</p><div class="w-full bg-gray-200 rounded-full h-4 mb-4"><div class="bg-ha-500 h-4 rounded-full" style="width: 88%"></div></div><p class="text-sm text-gray-600 mt-2 mb-2">12個月時，效果減弱，有 <span class="font-bold">52-72%</span> 機會維持輕至中等改善。</p><div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-ha-400 h-4 rounded-full" style="width: 62%"></div></div></div>
+                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-prp-500 flex flex-col hover:shadow-lg transition-shadow"><h4 class="text-xl font-bold text-prp-700 text-center mb-4">高濃度血小板血漿 (PRP)</h4><p class="text-sm text-gray-600 mb-2">6-12個月，有約 <span class="font-bold">96%</span> 機會維持大幅改善。</p><div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-prp-500 h-4 rounded-full" style="width: 96%"></div></div></div>
+                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-combo-500 flex flex-col hover:shadow-lg transition-shadow"><h4 class="text-xl font-bold text-combo-700 text-center mb-4">玻尿酸 + PRP</h4><p class="text-sm text-gray-600 mb-2">6-12個月，有 <span class="font-bold">93-95%</span> 機會維持大幅改善。</p><div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-combo-500 h-4 rounded-full" style="width: 94%"></div></div></div>
                             </div>
                         </div>
                         <!-- Side Effects Row -->
                         <div>
                             <h3 class="text-2xl font-bold text-center text-gray-700 mb-6">副作用風險比較 (注射部位疼痛等)</h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-500 flex flex-col"><h4 class="text-xl font-bold text-blue-700 text-center mb-4">玻尿酸</h4><p class="text-sm text-gray-600 mb-3">高分子量：每 <span class="font-bold">16</span> 人治療，約 <span class="font-bold">1</span> 人增副作用。</p><div id="ha-high-risk" class="flex flex-wrap gap-1.5 mb-4"></div><p class="text-sm text-gray-600 mt-3 mb-3">低分子量：每 <span class="font-bold">30</span> 人治療，約 <span class="font-bold">1</span> 人增副作用。</p><div id="ha-low-risk" class="flex flex-wrap gap-1.5"></div></div>
-                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500 flex flex-col"><h4 class="text-xl font-bold text-green-700 text-center mb-4">高濃度血小板血漿 (PRP)</h4><p class="text-sm text-gray-600 mb-3">每 <span class="font-bold">8</span> 人接受治療，約 <span class="font-bold">1</span> 人增副作用。</p><div id="prp-risk" class="flex flex-wrap gap-1.5"></div></div>
-                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-purple-500 flex flex-col"><h4 class="text-xl font-bold text-purple-700 text-center mb-4">玻尿酸 + PRP</h4><p class="text-sm text-gray-600 mb-3">每 <span class="font-bold">35</span> 人接受治療，約 <span class="font-bold">1</span> 人增副作用。</p><div id="combo-risk" class="flex flex-wrap gap-1.5"></div></div>
+                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-ha-500 flex flex-col hover:shadow-lg transition-shadow"><h4 class="text-xl font-bold text-ha-700 text-center mb-4">玻尿酸</h4><p class="text-sm text-gray-600 mb-3">高分子量：每 <span class="font-bold">16</span> 人治療，約 <span class="font-bold">1</span> 人增副作用。</p><div id="ha-high-risk" class="flex flex-wrap gap-1.5 mb-4"></div><p class="text-sm text-gray-600 mt-3 mb-3">低分子量：每 <span class="font-bold">30</span> 人治療，約 <span class="font-bold">1</span> 人增副作用。</p><div id="ha-low-risk" class="flex flex-wrap gap-1.5"></div></div>
+                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-prp-500 flex flex-col hover:shadow-lg transition-shadow"><h4 class="text-xl font-bold text-prp-700 text-center mb-4">高濃度血小板血漿 (PRP)</h4><p class="text-sm text-gray-600 mb-3">每 <span class="font-bold">8</span> 人接受治療，約 <span class="font-bold">1</span> 人增副作用。</p><div id="prp-risk" class="flex flex-wrap gap-1.5"></div></div>
+                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-combo-500 flex flex-col hover:shadow-lg transition-shadow"><h4 class="text-xl font-bold text-combo-700 text-center mb-4">玻尿酸 + PRP</h4><p class="text-sm text-gray-600 mb-3">每 <span class="font-bold">35</span> 人接受治療，約 <span class="font-bold">1</span> 人增副作用。</p><div id="combo-risk" class="flex flex-wrap gap-1.5"></div></div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="text-center mt-16">
-                    <a href="#section-5" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                    <a href="#section-5" class="bg-primary-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-primary-600 transition-transform transform hover:scale-105 shadow-lg">
                         下一步：評估您的個人考量
                     </a>
                 </div>
@@ -305,42 +453,49 @@
         <!-- Part 5: Personal Considerations (NEW ORDER) -->
         <section id="section-5" class="bg-white py-16 px-4 md:px-8 min-h-screen">
             <div class="max-w-3xl mx-auto">
-                <div class="flex items-center justify-center gap-4 mb-10">
+                <div class="flex items-center justify-center mb-10">
                     <h2 class="text-3xl font-bold text-center text-gray-800">選擇治療項目的考量與在意程度</h2>
-                    <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="considerations-content">🔊</button>
                 </div>
                 <div id="considerations-content">
-                    <p class="text-center text-lg text-gray-600 mb-8">了解您在意的事情，對選擇合適的治療方案十分重要。請用滑鼠<span class="font-bold text-blue-600">拖拉下方的卡片</span>，將您最在意的事情排在最上面。</p>
+                    <div class="bg-primary-50 border border-primary-200 rounded-lg p-6 mb-8">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-sm">⚒</div>
+                            <div>
+                                <p class="text-lg text-primary-800 mb-2">了解您在意的事情，對選擇合適的治療方案十分重要。</p>
+                                <p class="text-base text-primary-700">請用滑鼠<span class="font-bold text-primary-600">拖拉下方的卡片</span>，將您最在意的事情排在最上面。</p>
+                            </div>
+                        </div>
+                    </div>
                     <div id="draggable-container" class="space-y-4">
-                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-blue-400 flex items-center justify-between" draggable="true" data-key="W1">
+                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-primary-400 flex items-center justify-between hover:shadow-lg transition-shadow" draggable="true" data-key="W1">
                             <span class="text-xl font-medium">我希望治療效果能維持較久 (長效度)</span><span class="text-gray-400">☰</span>
                         </div>
-                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-red-400 flex items-center justify-between" draggable="true" data-key="W2">
+                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-primary-500 flex items-center justify-between hover:shadow-lg transition-shadow" draggable="true" data-key="W2">
                             <span class="text-xl font-medium">我對抽血感到擔心或害怕 (免抽血)</span><span class="text-gray-400">☰</span>
                         </div>
-                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-yellow-400 flex items-center justify-between" draggable="true" data-key="W3">
+                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-primary-600 flex items-center justify-between hover:shadow-lg transition-shadow" draggable="true" data-key="W3">
                             <span class="text-xl font-medium">我擔心需要經常回診接受注射 (注射頻率)</span><span class="text-gray-400">☰</span>
                         </div>
-                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-purple-400 flex items-center justify-between" draggable="true" data-key="W4">
-                            <span class="text-xl font-medium">我擔心注射時或注射後的疼痛 (副作用)</span><span class="text-gray-400">☰</span>
+                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-primary-700 flex items-center justify-between hover:shadow-lg transition-shadow" draggable="true" data-key="W4">
+                            <span class="text-xl font-medium">我擔心注射時或泣射後的疼痛 (副作用)</span><span class="text-gray-400">☰</span>
                         </div>
-                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-green-400 flex items-center justify-between" draggable="true" data-key="W5">
+                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-primary-800 flex items-center justify-between hover:shadow-lg transition-shadow" draggable="true" data-key="W5">
                             <span class="text-xl font-medium">我需要考慮治療的經濟負擔 (經濟負擔)</span><span class="text-gray-400">☰</span>
                         </div>
                     </div>
                 </div>
                 <div class="text-center mt-12">
-                    <button id="show-recommendation-btn" class="bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-green-700 transition-transform transform hover:scale-105 shadow-lg">
+                    <button id="show-recommendation-btn" class="bg-primary-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-primary-600 transition-transform transform hover:scale-105 shadow-lg">
                         計算個人化建議
                     </button>
                 </div>
-                <div id="recommendation-output" class="hidden mt-10 bg-blue-50 border-t-4 border-blue-300 p-6 rounded-b-lg shadow-md">
-                    <h3 class="text-2xl font-bold text-center text-blue-800 mb-4">您的個人化建議</h3>
-                    <div id="recommendation-text" class="text-center text-lg font-semibold bg-white p-4 rounded-md shadow-inner"></div>
-                    <div id="recommendation-message" class="hidden mt-4 text-center text-sm text-gray-600 p-3 bg-yellow-50 rounded-md"></div>
+                <div id="recommendation-output" class="hidden mt-10 bg-primary-50 border-t-4 border-primary-300 p-6 rounded-b-lg shadow-md">
+                    <h3 class="text-2xl font-bold text-center text-primary-800 mb-4">您的個人化建議</h3>
+                    <div id="recommendation-text" class="text-center text-lg font-semibold bg-white p-4 rounded-md shadow-inner border border-primary-100"></div>
+                    <div id="recommendation-message" class="hidden mt-4 text-center text-sm text-gray-600 p-3 bg-yellow-50 rounded-md border border-yellow-200"></div>
                 </div>
                 <div class="text-center mt-16">
-                    <a href="#section-6" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                    <a href="#section-6" class="text-white font-bold py-3 px-8 rounded-full text-lg transition-transform transform hover:scale-105 shadow-lg" style="background-color: #28839B;">
                         下一步：治療資訊我都理解了嗎？
                     </a>
                 </div>
@@ -350,9 +505,8 @@
         <!-- Part 6: Knowledge Check (NEW ORDER) -->
         <section id="section-6" class="bg-gray-50 py-16 px-4 md:px-8">
             <div class="max-w-3xl mx-auto">
-                <div class="flex items-center justify-center gap-4 mb-10">
+                <div class="flex items-center justify-center mb-10">
                     <h2 class="text-3xl font-bold text-center text-gray-800">對於治療資訊，您是否已清楚了解？</h2>
-                    <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="knowledge-check-content">🔊</button>
                 </div>
                 <div id="knowledge-check-content" class="space-y-6">
                     <p class="text-center text-lg text-gray-600 mb-8">請確認您已了解以下關於治療的關鍵資訊。</p>
@@ -383,7 +537,7 @@
                     </div>
                 </div>
                 <div class="text-center mt-16">
-                    <a href="#section-7" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                    <a href="#section-7" class="bg-primary-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-primary-600 transition-transform transform hover:scale-105 shadow-lg">
                         最後一步：做出您的決定
                     </a>
                 </div>
@@ -393,36 +547,35 @@
         <!-- Part 7: Make Your Decision (NEW ID) -->
         <section id="section-7" class="bg-gray-50 py-16 px-4 md:px-8">
             <div class="max-w-3xl mx-auto">
-                <div class="flex items-center justify-center gap-4 mb-10">
+                <div class="flex items-center justify-center mb-10">
                     <h2 class="text-3xl font-bold text-center text-gray-800">做出您的決定</h2>
-                    <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="decision-content">🔊</button>
                 </div>
                 <div id="decision-content" class="bg-white p-8 rounded-xl shadow-lg">
                     <p class="text-center text-lg text-gray-600 mb-8">請仔細考慮哪種治療方式目前最適合您。您不需要急著做決定，可以多花一些時間，和家人、朋友或醫療團隊討論後再決定。即使現在選定了某種治療，未來還是可以嘗試其他的治療方式。</p>
                     <div class="space-y-4" id="final-decision-form">
-                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
-                            <input type="radio" name="final-choice" value="ha" class="h-5 w-5 text-blue-600 focus:ring-blue-500">
+                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-all">
+                            <input type="radio" name="final-choice" value="ha" class="h-5 w-5 text-ha-600 focus:ring-ha-500">
                             <span class="ml-4 text-xl font-medium text-gray-800">關節潤滑保護製劑 (玻尿酸)</span>
                         </label>
                         <div id="ha-sub-options" class="hidden pl-12 space-x-6">
                             <label class="font-medium"><input type="radio" name="ha-type" value="low" class="mr-2">低分子量</label>
                             <label class="font-medium"><input type="radio" name="ha-type" value="high" class="mr-2">高分子量</label>
                         </div>
-                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
-                            <input type="radio" name="final-choice" value="prp" class="h-5 w-5 text-green-600 focus:ring-green-500">
+                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-all">
+                            <input type="radio" name="final-choice" value="prp" class="h-5 w-5 text-prp-600 focus:ring-prp-500">
                             <span class="ml-4 text-xl font-medium text-gray-800">高濃度血小板血漿製劑 (PRP)</span>
                         </label>
-                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
-                            <input type="radio" name="final-choice" value="combo" class="h-5 w-5 text-purple-600 focus:ring-purple-500">
+                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-all">
+                            <input type="radio" name="final-choice" value="combo" class="h-5 w-5 text-combo-600 focus:ring-combo-500">
                             <span class="ml-4 text-xl font-medium text-gray-800">玻尿酸合併高濃度血小板血漿製劑</span>
                         </label>
-                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
+                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-all">
                             <input type="radio" name="final-choice" value="unsure" class="h-5 w-5 text-gray-600 focus:ring-gray-500" checked>
                             <span class="ml-4 text-xl font-medium text-gray-800">目前還無法決定</span>
                         </label>
                         
                         <div id="unsure-options">
-                            <textarea id="unsure-reason" name="unsure-reason" rows="3" class="w-full p-3 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 mt-2" placeholder="如果您還無法決定，可以寫下您的原因或想了解的內容..."></textarea>
+                            <textarea id="unsure-reason" name="unsure-reason" rows="3" class="w-full p-3 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 mt-2" placeholder="如果您還無法決定，可以寫下您的原因或想了解的內容..."></textarea>
                             <div class="mt-8 border-t pt-6">
                                 <h4 class="text-xl font-semibold mb-4">如果您目前還無法做決定，是否還需要更多協助？</h4>
                                 <div class="space-y-3">
@@ -436,7 +589,7 @@
                     <div class="mt-8 border-t pt-6">
                         <h4 class="text-xl font-semibold mb-4">還有其他想了解或想問醫師的問題嗎？</h4>
                         <p class="text-gray-600 mb-2 text-sm">您可以將問題記錄在這裡，方便回診時與醫師討論。</p>
-                        <textarea id="additional-questions" name="additional-questions" rows="3" class="w-full p-3 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="請在此輸入您的問題..."></textarea>
+                        <textarea id="additional-questions" name="additional-questions" rows="3" class="w-full p-3 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500" placeholder="請在此輸入您的問題..."></textarea>
                     </div>
                 </div>
                 <div class="text-center mt-12">
@@ -452,27 +605,140 @@
         <!-- Summary content will be injected here -->
     </section>
 
-    <audio id="tts-audio-player" class="hidden"></audio>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- Global Variables ---
-            const ttsButtons = document.querySelectorAll('.tts-button');
-            const audioPlayer = document.getElementById('tts-audio-player');
-            let currentPlayingButton = null;
-            const API_KEY = ""; // Injected by environment
-            const TTS_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${API_KEY}`;
+
+            // --- Progress Tracking ---
+            const sections = ['welcome', 'section-2', 'section-3', 'section-3-5', 'section-4', 'section-5', 'section-6', 'section-7'];
+            const progressBar = document.querySelector('#progress-bar .bg-primary-500');
+            const progressText = document.getElementById('progress-text');
+            const backBtn = document.getElementById('back-btn');
+            let currentSectionIndex = 0;
+            let sectionHistory = [];
+
+            function updateProgress() {
+                const progress = ((currentSectionIndex + 1) / sections.length) * 100;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${currentSectionIndex + 1}/${sections.length}`;
+                
+                // Show/hide back button
+                if (sectionHistory.length > 0) {
+                    backBtn.classList.remove('hidden');
+                } else {
+                    backBtn.classList.add('hidden');
+                }
+            }
+
+            function trackSection(sectionId) {
+                const index = sections.indexOf(sectionId);
+                if (index !== -1 && index !== currentSectionIndex) {
+                    sectionHistory.push(currentSectionIndex);
+                    currentSectionIndex = index;
+                    updateProgress();
+                }
+            }
+
+            // Intersection Observer for automatic progress tracking
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+                        trackSection(entry.target.id);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            sections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) observer.observe(section);
+            });
+
+            // Back button functionality
+            backBtn.addEventListener('click', () => {
+                if (sectionHistory.length > 0) {
+                    const previousIndex = sectionHistory.pop();
+                    currentSectionIndex = previousIndex;
+                    updateProgress();
+                    const previousSection = document.getElementById(sections[previousIndex]);
+                    if (previousSection) {
+                        previousSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+
+            // Local storage for user progress
+            function saveProgress() {
+                const progressData = {
+                    currentSection: currentSectionIndex,
+                    preliminaryChoice: document.querySelector('input[name="preliminary-choice"]:checked')?.value,
+                    draggableOrder: [...draggableContainer.querySelectorAll('.draggable')].map(item => item.dataset.key),
+                    knowledgeChecks: [...document.querySelectorAll('.knowledge-item')].map(item => {
+                        const selected = item.querySelector('.check-btn.selected');
+                        return selected ? selected.textContent.includes('已了解') : null;
+                    }),
+                    finalChoice: document.querySelector('input[name="final-choice"]:checked')?.value,
+                    additionalQuestions: document.getElementById('additional-questions')?.value
+                };
+                localStorage.setItem('sdm-progress', JSON.stringify(progressData));
+            }
+            
+            function loadProgress() {
+                const saved = localStorage.getItem('sdm-progress');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        // Restore preliminary choice
+                        if (data.preliminaryChoice) {
+                            const radio = document.querySelector(`input[name="preliminary-choice"][value="${data.preliminaryChoice}"]`);
+                            if (radio) radio.checked = true;
+                        }
+                        // Show restoration notification
+                        if (data.currentSection > 0) {
+                            const notification = document.createElement('div');
+                            notification.className = 'fixed top-20 right-4 bg-primary-100 border border-primary-300 text-primary-800 px-4 py-2 rounded-lg shadow-lg z-50';
+                            notification.innerHTML = '已恢復您的進度 ✓';
+                            document.body.appendChild(notification);
+                            setTimeout(() => notification.remove(), 3000);
+                        }
+                    } catch (e) {
+                        console.log('無法恢復進度');
+                    }
+                }
+            }
+            
+            // Auto-save progress on form changes
+            document.addEventListener('change', saveProgress);
+            document.addEventListener('input', debounce(saveProgress, 1000));
+            
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+            
+            // Initialize progress and load saved data
+            updateProgress();
+            loadProgress();
 
             // --- Smooth Scrolling Logic ---
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
                     e.preventDefault();
-                    const targetId = this.getAttribute('href');
-                    const targetElement = document.querySelector(targetId);
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
                     if (targetElement) {
                         targetElement.scrollIntoView({
                             behavior: 'smooth'
                         });
+                        // Track navigation
+                        setTimeout(() => trackSection(targetId), 500);
                     }
                 });
             });
@@ -617,30 +883,98 @@
                 }
             });
             
-            // Add touch event listeners for mobile drag-and-drop
+            // Improved touch event listeners for mobile drag-and-drop
+            let touchStartY = 0;
+            let isDragging = false;
+            let touchDragThreshold = 10; // Minimum distance to start dragging
+
             draggableContainer.addEventListener('touchstart', e => {
-                if (e.target.classList.contains('draggable')) {
-                    draggingElement = e.target;
-                    draggingElement.classList.add('dragging');
+                if (e.target.closest('.draggable')) {
+                    const draggable = e.target.closest('.draggable');
+                    draggingElement = draggable;
+                    touchStartY = e.touches[0].clientY;
+                    isDragging = false;
+                    
+                    // Add initial touch feedback with haptic simulation
+                    draggable.style.transition = 'transform 0.1s ease';
+                    draggable.style.transform = 'scale(1.02)';
+                    
+                    // Haptic feedback simulation for supported devices
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(50); // Short vibration
+                    }
                 }
             });
 
             draggableContainer.addEventListener('touchmove', e => {
                 if (draggingElement) {
-                    e.preventDefault();
-                    const afterElement = getDragAfterElement(draggableContainer, e.touches[0].clientY);
-                    if (afterElement == null) {
-                        draggableContainer.appendChild(draggingElement);
-                    } else {
-                        draggableContainer.insertBefore(draggingElement, afterElement);
+                    const touchY = e.touches[0].clientY;
+                    const deltaY = Math.abs(touchY - touchStartY);
+                    
+                    // Start dragging only after threshold is met
+                    if (!isDragging && deltaY > touchDragThreshold) {
+                        isDragging = true;
+                        draggingElement.classList.add('dragging');
+                        draggingElement.style.transform = 'scale(1.05) rotate(3deg)';
+                        e.preventDefault();
+                        
+                        // Haptic feedback when dragging starts
+                        if ('vibrate' in navigator) {
+                            navigator.vibrate(75); // Slightly longer vibration for drag start
+                        }
+                    }
+                    
+                    if (isDragging) {
+                        e.preventDefault();
+                        const afterElement = getDragAfterElement(draggableContainer, touchY);
+                        if (afterElement == null) {
+                            draggableContainer.appendChild(draggingElement);
+                        } else {
+                            draggableContainer.insertBefore(draggingElement, afterElement);
+                        }
                     }
                 }
             });
 
             draggableContainer.addEventListener('touchend', e => {
                 if (draggingElement) {
+                    // Reset styles
+                    draggingElement.style.transform = '';
+                    draggingElement.style.transition = '';
+                    draggingElement.classList.remove('dragging');
+                    
+                    // Add completion feedback
+                    if (isDragging) {
+                        draggingElement.style.transition = 'all 0.3s ease';
+                        draggingElement.style.transform = 'scale(1.1)';
+                        setTimeout(() => {
+                            draggingElement.style.transform = '';
+                            setTimeout(() => {
+                                draggingElement.style.transition = '';
+                            }, 300);
+                        }, 100);
+                        
+                        // Show success message with haptic feedback
+                        showFeedbackMessage('順序已更新 ✓');
+                        
+                        // Success haptic feedback
+                        if ('vibrate' in navigator) {
+                            navigator.vibrate([100, 50, 100]); // Double vibration for success
+                        }
+                    }
+                    
+                    draggingElement = null;
+                    isDragging = false;
+                }
+            });
+
+            draggableContainer.addEventListener('touchcancel', e => {
+                if (draggingElement) {
+                    draggingElement.style.transform = '';
+                    draggingElement.style.transition = '';
                     draggingElement.classList.remove('dragging');
                     draggingElement = null;
+                    isDragging = false;
                 }
             });
 
@@ -656,6 +990,29 @@
                         return closest;
                     }
                 }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+            
+            function showFeedbackMessage(message) {
+                // Create feedback message element
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-primary-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 opacity-0 translate-y-2';
+                feedbackDiv.textContent = message;
+                
+                // Add to page
+                document.body.appendChild(feedbackDiv);
+                
+                // Animate in
+                setTimeout(() => {
+                    feedbackDiv.classList.remove('opacity-0', 'translate-y-2');
+                }, 50);
+                
+                // Remove after delay
+                setTimeout(() => {
+                    feedbackDiv.classList.add('opacity-0', 'translate-y-2');
+                    setTimeout(() => {
+                        document.body.removeChild(feedbackDiv);
+                    }, 300);
+                }, 2000);
             }
             
             function calculateRecommendation(ranks) {
@@ -739,13 +1096,27 @@
             }
 
             showRecommendationBtn.addEventListener('click', () => {
-                const orderedDraggables = [...draggableContainer.querySelectorAll('.draggable')];
-                const ranks = orderedDraggables.map(item => item.dataset.key);
+                // Add loading state
+                showRecommendationBtn.classList.add('btn-loading');
+                showRecommendationBtn.disabled = true;
                 
-                const result = calculateRecommendation(ranks);
+                setTimeout(() => {
+                    const orderedDraggables = [...draggableContainer.querySelectorAll('.draggable')];
+                    const ranks = orderedDraggables.map(item => item.dataset.key);
+                    
+                    const result = calculateRecommendation(ranks);
                 
-                let recommendationHtml = `根據您的偏好排序，建議您可以優先考慮：<br><span class="text-2xl text-green-700">${result.recommendation}</span>`;
+                let recommendationHtml = `根據您的偏好排序，建議您可以優先考慮：<br><span class="text-2xl text-primary-700">${result.recommendation}</span>`;
                 recommendationText.innerHTML = recommendationHtml;
+                
+                // Add animation to recommendation output
+                recommendationOutput.style.opacity = '0';
+                recommendationOutput.style.transform = 'translateY(20px)';
+                requestAnimationFrame(() => {
+                    recommendationOutput.style.transition = 'all 0.5s ease-out';
+                    recommendationOutput.style.opacity = '1';
+                    recommendationOutput.style.transform = 'translateY(0)';
+                });
 
                 if (result.message) {
                     recommendationMessage.textContent = result.message;
@@ -755,6 +1126,11 @@
                 }
 
                 recommendationOutput.classList.remove('hidden');
+                
+                // Remove loading state
+                showRecommendationBtn.classList.remove('btn-loading');
+                showRecommendationBtn.disabled = false;
+                }, 1000); // Simulate processing time
             });
 
             // --- Part 6: Knowledge Check (NEW ORDER) ---
@@ -910,7 +1286,7 @@
 
                         <div class="text-center mt-12 space-x-4 no-print">
                             <button id="back-to-tool-btn" class="bg-gray-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-gray-600 transition">返回修改</button>
-                            <button id="print-summary-btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition">🖨️ 列印此頁</button>
+                            <button id="print-summary-btn" class="bg-primary-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-primary-600 transition">🖨️ 列印此頁</button>
                         </div>
                     </div>
                 `;
@@ -928,83 +1304,6 @@
             }
 
 
-            // --- TTS Feature ---
-            async function withExponentialBackoff(apiCallFunction, maxRetries = 5) {
-                let delay = 1000;
-                for (let i = 0; i < maxRetries; i++) {
-                    try { return await apiCallFunction(); } catch (error) {
-                        if (i === maxRetries - 1) throw error;
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2;
-                    }
-                }
-            }
-            function base64ToArrayBuffer(base64) {
-                const binaryString = window.atob(base64);
-                const len = binaryString.length;
-                const bytes = new Uint8Array(len);
-                for (let i = 0; i < len; i++) { bytes[i] = binaryString.charCodeAt(i); }
-                return bytes.buffer;
-            }
-            function pcmToWav(pcmData, sampleRate) {
-                const numChannels = 1, bitsPerSample = 16, byteRate = sampleRate * numChannels * bitsPerSample / 8, blockAlign = numChannels * bitsPerSample / 8, dataSize = pcmData.length * 2, buffer = new ArrayBuffer(44 + dataSize);
-                const view = new DataView(buffer);
-                function writeString(view, offset, string) { for (let i = 0; i < string.length; i++) { view.setUint8(offset + i, string.charCodeAt(i)); } }
-                writeString(view, 0, 'RIFF'); view.setUint32(4, 36 + dataSize, true); writeString(view, 8, 'WAVE'); writeString(view, 12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, numChannels, true); view.setUint32(24, sampleRate, true); view.setUint32(28, byteRate, true); view.setUint16(32, blockAlign, true); view.setUint16(34, bitsPerSample, true); writeString(view, 36, 'data'); view.setUint32(40, dataSize, true);
-                const pcm16 = new Int16Array(pcmData);
-                for (let i = 0; i < pcm16.length; i++) { view.setInt16(44 + i * 2, pcm16[i], true); }
-                return new Blob([view], { type: 'audio/wav' });
-            }
-            async function handleTTS(button) {
-                if (currentPlayingButton) {
-                    audioPlayer.pause(); audioPlayer.currentTime = 0;
-                    currentPlayingButton.classList.remove('playing'); currentPlayingButton.innerHTML = '🔊';
-                    if (currentPlayingButton === button) { currentPlayingButton = null; return; }
-                }
-                const sectionId = button.dataset.sectionId;
-                const section = document.getElementById(sectionId);
-                if (!section) return;
-                let textToRead = '';
-                if (sectionId === 'treatment-options-content') {
-                     const visibleContent = section.querySelector('.tab-content:not(.hidden)');
-                     if(visibleContent) textToRead = visibleContent.innerText.trim();
-                } else { textToRead = section.innerText.trim(); }
-                if (!textToRead) return;
-                currentPlayingButton = button;
-                button.innerHTML = '<div class="loader !w-6 !h-6 !border-t-blue-500"></div>';
-                try {
-                    const payload = { model: "gemini-2.5-flash-preview-tts", contents: [{ parts: [{ text: textToRead }] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zubenelgenubi" } } } } };
-                    const apiCall = async () => {
-                        const response = await fetch(TTS_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                        if (!response.ok) throw new Error(`API responded with status: ${response.status}`);
-                        return response.json();
-                    };
-                    const result = await withExponentialBackoff(apiCall);
-                    const part = result?.candidates?.[0]?.content?.parts?.[0];
-                    const audioData = part?.inlineData?.data;
-                    const mimeType = part?.inlineData?.mimeType;
-                    if (audioData && mimeType && mimeType.startsWith("audio/")) {
-                        const sampleRateMatch = mimeType.match(/rate=(\d+)/);
-                        const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
-                        const pcmData = base64ToArrayBuffer(audioData);
-                        const pcm16 = new Int16Array(pcmData);
-                        const wavBlob = pcmToWav(pcm16, sampleRate);
-                        const audioUrl = URL.createObjectURL(wavBlob);
-                        audioPlayer.src = audioUrl; audioPlayer.play();
-                        button.innerHTML = '⏹️'; button.classList.add('playing');
-                    } else { throw new Error("Invalid audio data received from API."); }
-                } catch (error) {
-                    console.error("TTS Error:", error);
-                    button.innerHTML = '⚠️'; currentPlayingButton = null;
-                }
-            }
-            ttsButtons.forEach(button => { button.addEventListener('click', () => handleTTS(button)); });
-            audioPlayer.onended = () => {
-                if (currentPlayingButton) {
-                    currentPlayingButton.classList.remove('playing'); currentPlayingButton.innerHTML = '🔊';
-                    currentPlayingButton = null;
-                }
-            };
         });
     </script>
 </body>
