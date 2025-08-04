@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>治療退化性膝關節炎 - 病患決策輔助工具 (AI增強版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        /* The html scroll-behavior is now handled by JavaScript for better compatibility */
+        html {
+            /* scroll-behavior: smooth; */ /* Removed in favor of JS solution */
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 24px;
+            height: 24px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .tts-button.playing {
+            color: #3b82f6; /* blue-500 */
+        }
+        .tab-button.active {
+            border-color: #3b82f6; /* blue-500 */
+            color: #3b82f6;
+            background-color: #eff6ff; /* blue-50 */
+        }
+        .person-icon.highlight {
+            fill: #ef4444; /* red-500 */
+        }
+        .radio-label {
+            transition: all 0.2s ease-in-out;
+        }
+        .radio-label:has(input:checked) {
+            background-color: #dbeafe; /* blue-100 */
+            border-color: #3b82f6; /* blue-500 */
+            color: #1e40af; /* blue-800 */
+        }
+        /* Drag and Drop Styles */
+        .draggable {
+            cursor: move;
+            user-select: none;
+        }
+        .dragging {
+            opacity: 0.5;
+            background: #e0e7ff;
+        }
+        /* Knowledge Check Button Styles */
+        .check-btn.selected {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .ha-type-button.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+         .ha-type-button:not(.active) {
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #summary-page, #summary-page * {
+                visibility: visible;
+            }
+            #summary-page {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div id="main-content">
+        <!-- Part 1: Welcome & Introduction -->
+        <section id="welcome" class="min-h-screen flex flex-col items-center justify-center bg-white p-6 text-center">
+            <div class="max-w-3xl mx-auto">
+                <div class="flex items-center justify-center gap-4">
+                    <h1 class="text-4xl md:text-5xl font-bold text-blue-600">治療退化性膝關節炎</h1>
+                    <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="welcome-text">🔊</button>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-semibold text-gray-700 mb-8">我該接受膝關節腔內注射治療嗎？</h2>
+                
+                <div id="welcome-text">
+                    <div class="text-left bg-gray-100 p-6 rounded-lg shadow-sm">
+                        <h3 class="font-bold text-xl mb-3 text-gray-800">前言</h3>
+                        <p class="text-base md:text-lg mb-4">
+                            當醫師診斷，確定您患有「退化性膝關節炎」，本表單將幫助您瞭解相關病因及有哪些治療方式。
+                        </p>
+                        <p class="text-base md:text-lg mb-2">
+                            若您已嘗試過<span class="font-semibold text-orange-600">減重、復健運動、口服或局部外用消炎止痛藥物治療、膝關節內注射類固醇</span>，但關節疼痛仍造成您生活上的困擾，
+                        </p>
+                        <p class="text-base md:text-lg mb-4">
+                            那麼<span class="font-semibold text-teal-600">膝關節腔內注射玻尿酸或高濃度血小板血漿製劑(PRP)</span>治療可能可以緩解您的症狀。
+                        </p>
+                        <p class="text-base md:text-lg">
+                            接下來請跟著我們的步驟，一步步探索自己的需求與在意的事情，希望我們能一起討論出最適合您的治療選擇。
+                        </p>
+                    </div>
+
+                     <div class="text-left bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg shadow-sm mt-6">
+                        <h3 class="font-bold text-xl mb-3 text-blue-800">適用對象</h3>
+                        <p class="text-base md:text-lg">
+                            當醫師診斷您確定患有「退化性膝關節炎」，已接受過減重、復健運動、口服/局部外用藥物或類固醇注射治療，但仍無法有效改善疼痛，且目前不考慮置換人工關節之病人。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12">
+                <a href="#section-2" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                    開始探索
+                </a>
+            </div>
+        </section>
+
+        <!-- Part 2: What is Degenerative Knee Arthritis? -->
+        <section id="section-2" class="bg-white py-16 px-4 md:px-8">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center justify-center gap-4 mb-10">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">什麼是退化性膝關節炎？</h2>
+                    <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="arthritis-info">🔊</button>
+                </div>
+                
+                <div id="arthritis-info">
+                    <div class="bg-white p-8 rounded-xl grid md:grid-cols-2 gap-8 items-center">
+                        <div class="w-full">
+                            <img 
+                                src="images/knee-arthritis-diagram.png" 
+                                alt="退化性膝關節炎圖解，顯示軟骨磨損與關節腔狹小" 
+                                class="w-full h-auto rounded-lg shadow-sm"
+                                onerror="this.onerror=null; this.src='https://placehold.co/400x600/e2e8f0/64748b?text=%E5%9C%96%E7%89%87%E8%BC%89%E5%85%A5%E5%A4%B1%E6%95%97';">
+                        </div>
+                        <div class="text-gray-700 space-y-4">
+                            <p class="text-lg">退化性膝關節炎是常見的老年退化疾病，國內盛行率約15%，主因為<span class="font-semibold text-blue-600">關節軟骨磨損</span>。軟骨受損<span class="font-semibold text-blue-600">不可逆</span>，症狀會<span class="font-semibold text-blue-600">隨時間惡化</span>，常見表現為<span class="font-semibold text-blue-600">疼痛</span>、<span class="font-semibold text-blue-600">腫脹</span>與<span class="font-semibold text-blue-600">發熱</span>。</p>
+                            <p class="text-lg">由於<span class="font-semibold text-blue-600">關節腔間距狹小</span>，導致骨頭間摩擦增加，進一步加劇疼痛。</p>
+                            <div class="text-lg bg-gray-100 p-4 rounded-lg">
+                                <p class="font-semibold">治療以緩解症狀、維持功能為目標，可採：</p>
+                                <ul class="list-disc list-inside mt-2 space-y-1">
+                                    <li>復健運動</li>
+                                    <li>口服或外用消炎止痛藥及葡萄糖胺</li>
+                                    <li>急性期關節內注射類固醇短期消炎止痛</li>
+                                </ul>
+                            </div>
+                             <p class="text-lg pt-2">當症狀控制不佳時，可考慮<span class="font-semibold text-blue-600">關節內注射玻尿酸</span>或<span class="font-semibold text-blue-600">高濃度血小板血漿製劑(PRP)</span>，或最後進行人工關節置換。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-12">
+                    <a href="#section-3" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                        了解注射治療選項
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Part 3: Treatment Options -->
+        <section id="section-3" class="bg-gray-50 py-16 px-4 md:px-8">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center justify-center gap-4 mb-10">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">膝關節腔內注射治療選項</h2>
+                     <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="treatment-options-content">🔊</button>
+                </div>
+
+                <div class="mb-8 flex justify-center border-b border-gray-200">
+                    <button class="tab-button active text-lg font-semibold py-3 px-6 border-b-2 transition" data-tab="ha">玻尿酸</button>
+                    <button class="tab-button text-lg font-semibold py-3 px-6 border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition" data-tab="prp">PRP</button>
+                    <button class="tab-button text-lg font-semibold py-3 px-6 border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition" data-tab="combo">玻尿酸 + PRP</button>
+                </div>
+
+                <div id="treatment-options-content">
+                    <div id="ha-content" class="tab-content bg-white p-8 rounded-xl shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 text-blue-700">關節潤滑保護製劑 (玻尿酸)</h3>
+                        <p class="text-lg mb-6">玻尿酸是關節滑液中天然存在的黏彈物質，可提供<span class="font-semibold text-blue-600">關節潤滑</span>與<span class="font-semibold text-blue-600">減震</span>作用。透過將玻尿酸直接注射到膝關節腔，可<span class="font-semibold text-blue-600">暫時補充</span>關節滑液、減少骨頭間的摩擦，也有<span class="font-semibold text-blue-600">抑制發炎</span>及<span class="font-semibold text-blue-600">保護軟骨</span>的效果。</p>
+                        <p class="text-lg mb-6">常見的副作用為<span class="font-semibold text-blue-600">注射部位短暫疼痛</span>，冰敷通常可以緩解。本院現有的玻尿酸注射劑型，依其成分結構，大致可分為兩類。每年治療花費約 6,000至8,000元，<span class="font-semibold text-blue-600">健保僅有條件給付</span>，故多數病人仍需<span class="font-semibold text-blue-600">自費使用</span>。</p>
+                        <div class="bg-gray-100 rounded-lg p-6">
+                            <div class="flex flex-wrap justify-center gap-4 mb-6">
+                                <button class="ha-type-button active py-2 px-5 rounded-full" data-ha-type="low">低分子量 (非交聯)</button>
+                                <button class="ha-type-button py-2 px-5 rounded-full" data-ha-type="high">高分子量 (交聯)</button>
+                                <button class="ha-type-button py-2 px-5 rounded-full" data-ha-type="compare">比較差異</button>
+                            </div>
+                            <div id="ha-details" class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center"></div>
+                            <div id="ha-comparison" class="hidden"></div>
+                        </div>
+                    </div>
+                    <div id="prp-content" class="tab-content hidden bg-white p-8 rounded-xl shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 text-green-700">高濃度血小板血漿製劑 (PRP)</h3>
+                        <p class="text-lg mb-4">高濃度血小板血漿製劑 (Platelet-Rich Plasma, PRP)是抽取<span class="font-semibold text-green-600">少量病人的靜脈血</span>，經離心濃縮後，取得含<span class="font-semibold text-green-600">高濃度血小板</span>與<span class="font-semibold text-green-600">生長因子</span>的血漿，再回注膝關節。PRP富含多種生長因子，有<span class="font-semibold text-green-600">抗發炎</span>、促進<span class="font-semibold text-green-600">血管新生</span>、<span class="font-semibold text-green-600">軟組織修復</span>的功能。</p>
+                        <p class="text-lg mb-4">建議療程將依病人的症狀，執行1-3次的治療注射, 每次間隔2-4週。</p>
+                        <p class="text-lg mb-4">PRP治療由於是採用病人自體血液離心，故不會有過敏之風險。副作用多為<span class="font-semibold text-green-600">注射部位短暫疼痛</span>，冰敷通常可以緩解。</p>
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-4 rounded-r-lg">
+                            <p class="font-semibold">請注意：</p>
+                            <p>PRP並非適用所有病人，若您有血小板功能或凝血功能異常、使用抗凝血劑、患有感染或免疫系統疾病，皆不建議進行PRP治療。單次治療約15,000-20,000元，目前健保並未給付。</p>
+                        </div>
+                    </div>
+                    <div id="combo-content" class="tab-content hidden bg-white p-8 rounded-xl shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 text-purple-700">玻尿酸合併高濃度血小板血漿製劑</h3>
+                        <p class="text-lg mb-4">玻尿酸提供關節潤滑與減震作用，而PRP內含豐富生長因子，可調節發炎並促進軟骨細胞修復。兩者合併時，玻尿酸的<span class="font-semibold text-purple-600">高黏度特性</span>可<span class="font-semibold text-purple-600">延長PRP在關節內的停留</span>，讓生長因子持續釋放。</p>
+                        <p class="text-lg mb-4">建議療程將依病人的症狀，執行1-3次的治療注射，每次間隔2-4週。</p>
+                        <p class="text-lg mb-6">副作用多為<span class="font-semibold text-purple-600">注射部位短暫疼痛</span>，冰敷通常可以緩解。</p>
+                        <div class="bg-indigo-50 border-l-4 border-indigo-400 text-indigo-800 p-4 rounded-r-lg">
+                            <p class="font-semibold">關於費用：</p>
+                            <p>本院目前備有一針型的混合注射產品，單次治療約需35,000-40,000元。</p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="text-center mt-12">
+                    <a href="#section-3-5" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                        下一步：做出初步選擇
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Part 3.5: Preliminary Choice -->
+        <section id="section-3-5" class="bg-white py-16 px-4 md:px-8">
+            <div class="max-w-2xl mx-auto">
+                <div class="flex items-center justify-center gap-4 mb-10">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">您目前比較想要選擇的治療選項</h2>
+                     <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="preliminary-choice-content">🔊</button>
+                </div>
+                <div id="preliminary-choice-content">
+                    <p class="text-center text-lg text-gray-600 mb-8">在看過基本介紹後，請依您的第一直覺，選擇一個目前比較偏好的治療選項。這不是最終決定，只是幫助您釐清想法的第一步。</p>
+                    <div class="space-y-4">
+                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
+                            <input type="radio" name="preliminary-choice" value="ha" class="h-5 w-5 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-4 text-xl font-medium text-gray-800">關節潤滑保護製劑 (玻尿酸)</span>
+                        </label>
+                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
+                            <input type="radio" name="preliminary-choice" value="prp" class="h-5 w-5 text-green-600 focus:ring-green-500">
+                            <span class="ml-4 text-xl font-medium text-gray-800">高濃度血小板血漿製劑 (PRP)</span>
+                        </label>
+                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
+                            <input type="radio" name="preliminary-choice" value="combo" class="h-5 w-5 text-purple-600 focus:ring-purple-500">
+                            <span class="ml-4 text-xl font-medium text-gray-800">玻尿酸合併高濃度血小板血漿製劑</span>
+                        </label>
+                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
+                            <input type="radio" name="preliminary-choice" value="unsure" class="h-5 w-5 text-gray-600 focus:ring-gray-500" checked>
+                            <span class="ml-4 text-xl font-medium text-gray-800">我還不確定</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="text-center mt-12">
+                    <a href="#section-4" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                        下一步：比較療效與副作用
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Part 4: Efficacy and Side Effects Comparison -->
+        <section id="section-4" class="bg-gray-50 py-16 px-4 md:px-8">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex items-center justify-center gap-4 mb-10">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">治療選項的療效與副作用</h2>
+                    <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="comparison-content-wrapper">🔊</button>
+                </div>
+                <div id="comparison-content-wrapper">
+                    <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">這裡我們將三種治療選項的「療效」與「副作用」分開呈現，幫助您更清楚地比較。您可以上下對照，看看同一個治療選項在兩方面的表現。</p>
+                    <div class="space-y-12">
+                        <!-- Efficacy Row -->
+                        <div>
+                            <h3 class="text-2xl font-bold text-center text-gray-700 mb-6">療效比較 (疼痛改善效果)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-500 flex flex-col"><h4 class="text-xl font-bold text-blue-700 text-center mb-4">玻尿酸</h4><p class="text-sm text-gray-600 mb-2">6個月時，有 <span class="font-bold">86-91%</span> 機會達大幅改善。</p><div class="w-full bg-gray-200 rounded-full h-4 mb-4"><div class="bg-blue-500 h-4 rounded-full" style="width: 88%"></div></div><p class="text-sm text-gray-600 mt-2 mb-2">12個月時，效果減弱，有 <span class="font-bold">52-72%</span> 機會維持輕至中等改善。</p><div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-blue-400 h-4 rounded-full" style="width: 62%"></div></div></div>
+                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500 flex flex-col"><h4 class="text-xl font-bold text-green-700 text-center mb-4">高濃度血小板血漿 (PRP)</h4><p class="text-sm text-gray-600 mb-2">6-12個月，有約 <span class="font-bold">96%</span> 機會維持大幅改善。</p><div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-green-500 h-4 rounded-full" style="width: 96%"></div></div></div>
+                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-purple-500 flex flex-col"><h4 class="text-xl font-bold text-purple-700 text-center mb-4">玻尿酸 + PRP</h4><p class="text-sm text-gray-600 mb-2">6-12個月，有 <span class="font-bold">93-95%</span> 機會維持大幅改善。</p><div class="w-full bg-gray-200 rounded-full h-4"><div class="bg-purple-500 h-4 rounded-full" style="width: 94%"></div></div></div>
+                            </div>
+                        </div>
+                        <!-- Side Effects Row -->
+                        <div>
+                            <h3 class="text-2xl font-bold text-center text-gray-700 mb-6">副作用風險比較 (注射部位疼痛等)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-500 flex flex-col"><h4 class="text-xl font-bold text-blue-700 text-center mb-4">玻尿酸</h4><p class="text-sm text-gray-600 mb-3">高分子量：每 <span class="font-bold">16</span> 人治療，約 <span class="font-bold">1</span> 人增副作用。</p><div id="ha-high-risk" class="flex flex-wrap gap-1.5 mb-4"></div><p class="text-sm text-gray-600 mt-3 mb-3">低分子量：每 <span class="font-bold">30</span> 人治療，約 <span class="font-bold">1</span> 人增副作用。</p><div id="ha-low-risk" class="flex flex-wrap gap-1.5"></div></div>
+                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500 flex flex-col"><h4 class="text-xl font-bold text-green-700 text-center mb-4">高濃度血小板血漿 (PRP)</h4><p class="text-sm text-gray-600 mb-3">每 <span class="font-bold">8</span> 人接受治療，約 <span class="font-bold">1</span> 人增副作用。</p><div id="prp-risk" class="flex flex-wrap gap-1.5"></div></div>
+                                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-purple-500 flex flex-col"><h4 class="text-xl font-bold text-purple-700 text-center mb-4">玻尿酸 + PRP</h4><p class="text-sm text-gray-600 mb-3">每 <span class="font-bold">35</span> 人接受治療，約 <span class="font-bold">1</span> 人增副作用。</p><div id="combo-risk" class="flex flex-wrap gap-1.5"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-16">
+                    <a href="#section-5" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                        下一步：評估您的個人考量
+                    </a>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Part 5: Personal Considerations (NEW ORDER) -->
+        <section id="section-5" class="bg-white py-16 px-4 md:px-8 min-h-screen">
+            <div class="max-w-3xl mx-auto">
+                <div class="flex items-center justify-center gap-4 mb-10">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">選擇治療項目的考量與在意程度</h2>
+                    <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="considerations-content">🔊</button>
+                </div>
+                <div id="considerations-content">
+                    <p class="text-center text-lg text-gray-600 mb-8">了解您在意的事情，對選擇合適的治療方案十分重要。請用滑鼠<span class="font-bold text-blue-600">拖拉下方的卡片</span>，將您最在意的事情排在最上面。</p>
+                    <div id="draggable-container" class="space-y-4">
+                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-blue-400 flex items-center justify-between" draggable="true" data-key="W1">
+                            <span class="text-xl font-medium">我希望治療效果能維持較久 (長效度)</span><span class="text-gray-400">☰</span>
+                        </div>
+                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-red-400 flex items-center justify-between" draggable="true" data-key="W2">
+                            <span class="text-xl font-medium">我對抽血感到擔心或害怕 (免抽血)</span><span class="text-gray-400">☰</span>
+                        </div>
+                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-yellow-400 flex items-center justify-between" draggable="true" data-key="W3">
+                            <span class="text-xl font-medium">我擔心需要經常回診接受注射 (注射頻率)</span><span class="text-gray-400">☰</span>
+                        </div>
+                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-purple-400 flex items-center justify-between" draggable="true" data-key="W4">
+                            <span class="text-xl font-medium">我擔心注射時或注射後的疼痛 (副作用)</span><span class="text-gray-400">☰</span>
+                        </div>
+                        <div class="draggable bg-white p-5 rounded-lg shadow-md border-l-4 border-green-400 flex items-center justify-between" draggable="true" data-key="W5">
+                            <span class="text-xl font-medium">我需要考慮治療的經濟負擔 (經濟負擔)</span><span class="text-gray-400">☰</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-12">
+                    <button id="show-recommendation-btn" class="bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-green-700 transition-transform transform hover:scale-105 shadow-lg">
+                        計算個人化建議
+                    </button>
+                </div>
+                <div id="recommendation-output" class="hidden mt-10 bg-blue-50 border-t-4 border-blue-300 p-6 rounded-b-lg shadow-md">
+                    <h3 class="text-2xl font-bold text-center text-blue-800 mb-4">您的個人化建議</h3>
+                    <div id="recommendation-text" class="text-center text-lg font-semibold bg-white p-4 rounded-md shadow-inner"></div>
+                    <div id="recommendation-message" class="hidden mt-4 text-center text-sm text-gray-600 p-3 bg-yellow-50 rounded-md"></div>
+                </div>
+                <div class="text-center mt-16">
+                    <a href="#section-6" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                        下一步：治療資訊我都理解了嗎？
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Part 6: Knowledge Check (NEW ORDER) -->
+        <section id="section-6" class="bg-gray-50 py-16 px-4 md:px-8">
+            <div class="max-w-3xl mx-auto">
+                <div class="flex items-center justify-center gap-4 mb-10">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">對於治療資訊，您是否已清楚了解？</h2>
+                    <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="knowledge-check-content">🔊</button>
+                </div>
+                <div id="knowledge-check-content" class="space-y-6">
+                    <p class="text-center text-lg text-gray-600 mb-8">請確認您已了解以下關於治療的關鍵資訊。</p>
+                    <div class="knowledge-item bg-white p-5 rounded-lg shadow-sm">
+                        <p class="text-lg text-gray-800 mb-4">1. 自然退化的膝關節軟骨一旦受損，就無法自然復原。</p>
+                        <div class="flex justify-end gap-3"><button class="check-btn bg-white border border-gray-300 py-2 px-5 rounded-full hover:bg-gray-200 transition">✅ 已了解</button><button class="check-btn bg-white border border-gray-300 py-2 px-5 rounded-full hover:bg-gray-200 transition">🤔 不太確定</button></div>
+                        <div class="explanation-text hidden mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg"></div>
+                    </div>
+                    <div class="knowledge-item bg-white p-5 rounded-lg shadow-sm">
+                        <p class="text-lg text-gray-800 mb-4">2. 玻尿酸注射劑大致分為兩類，其中高分子量玻尿酸一年僅需注射一次，但注射部位疼痛通常較嚴重。</p>
+                        <div class="flex justify-end gap-3"><button class="check-btn bg-white border border-gray-300 py-2 px-5 rounded-full hover:bg-gray-200 transition">✅ 已了解</button><button class="check-btn bg-white border border-gray-300 py-2 px-5 rounded-full hover:bg-gray-200 transition">🤔 不太確定</button></div>
+                        <div class="explanation-text hidden mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg"></div>
+                    </div>
+                    <div class="knowledge-item bg-white p-5 rounded-lg shadow-sm">
+                        <p class="text-lg text-gray-800 mb-4">3. 使用玻尿酸治療，能有效維持約6個月的疼痛改善效果。然而，到了12個月時，維持疼痛改善的機會可能會降低。</p>
+                        <div class="flex justify-end gap-3"><button class="check-btn bg-white border border-gray-300 py-2 px-5 rounded-full hover:bg-gray-200 transition">✅ 已了解</button><button class="check-btn bg-white border border-gray-300 py-2 px-5 rounded-full hover:bg-gray-200 transition">🤔 不太確定</button></div>
+                        <div class="explanation-text hidden mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg"></div>
+                    </div>
+                    <div class="knowledge-item bg-white p-5 rounded-lg shadow-sm">
+                        <p class="text-lg text-gray-800 mb-4">4. 使用PRP或玻尿酸合併PRP，能有效維持約12個月的疼痛改善效果。</p>
+                        <div class="flex justify-end gap-3"><button class="check-btn bg-white border border-gray-300 py-2 px-5 rounded-full hover:bg-gray-200 transition">✅ 已了解</button><button class="check-btn bg-white border border-gray-300 py-2 px-5 rounded-full hover:bg-gray-200 transition">🤔 不太確定</button></div>
+                        <div class="explanation-text hidden mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg"></div>
+                    </div>
+                    <div class="knowledge-item bg-white p-5 rounded-lg shadow-sm">
+                        <p class="text-lg text-gray-800 mb-4">5. PRP相關注射劑的製備需要抽取患者少量靜脈血。</p>
+                        <div class="flex justify-end gap-3"><button class="check-btn bg-white border border-gray-300 py-2 px-5 rounded-full hover:bg-gray-200 transition">✅ 已了解</button><button class="check-btn bg-white border border-gray-300 py-2 px-5 rounded-full hover:bg-gray-200 transition">🤔 不太確定</button></div>
+                        <div class="explanation-text hidden mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg"></div>
+                    </div>
+                </div>
+                <div class="text-center mt-16">
+                    <a href="#section-7" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+                        最後一步：做出您的決定
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Part 7: Make Your Decision (NEW ID) -->
+        <section id="section-7" class="bg-gray-50 py-16 px-4 md:px-8">
+            <div class="max-w-3xl mx-auto">
+                <div class="flex items-center justify-center gap-4 mb-10">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">做出您的決定</h2>
+                    <button class="tts-button text-2xl text-gray-400 hover:text-blue-500 transition" data-section-id="decision-content">🔊</button>
+                </div>
+                <div id="decision-content" class="bg-white p-8 rounded-xl shadow-lg">
+                    <p class="text-center text-lg text-gray-600 mb-8">請仔細考慮哪種治療方式目前最適合您。您不需要急著做決定，可以多花一些時間，和家人、朋友或醫療團隊討論後再決定。即使現在選定了某種治療，未來還是可以嘗試其他的治療方式。</p>
+                    <div class="space-y-4" id="final-decision-form">
+                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
+                            <input type="radio" name="final-choice" value="ha" class="h-5 w-5 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-4 text-xl font-medium text-gray-800">關節潤滑保護製劑 (玻尿酸)</span>
+                        </label>
+                        <div id="ha-sub-options" class="hidden pl-12 space-x-6">
+                            <label class="font-medium"><input type="radio" name="ha-type" value="low" class="mr-2">低分子量</label>
+                            <label class="font-medium"><input type="radio" name="ha-type" value="high" class="mr-2">高分子量</label>
+                        </div>
+                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
+                            <input type="radio" name="final-choice" value="prp" class="h-5 w-5 text-green-600 focus:ring-green-500">
+                            <span class="ml-4 text-xl font-medium text-gray-800">高濃度血小板血漿製劑 (PRP)</span>
+                        </label>
+                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
+                            <input type="radio" name="final-choice" value="combo" class="h-5 w-5 text-purple-600 focus:ring-purple-500">
+                            <span class="ml-4 text-xl font-medium text-gray-800">玻尿酸合併高濃度血小板血漿製劑</span>
+                        </label>
+                        <label class="radio-label flex items-center p-5 rounded-lg border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer">
+                            <input type="radio" name="final-choice" value="unsure" class="h-5 w-5 text-gray-600 focus:ring-gray-500" checked>
+                            <span class="ml-4 text-xl font-medium text-gray-800">目前還無法決定</span>
+                        </label>
+                        
+                        <div id="unsure-options">
+                            <textarea id="unsure-reason" name="unsure-reason" rows="3" class="w-full p-3 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 mt-2" placeholder="如果您還無法決定，可以寫下您的原因或想了解的內容..."></textarea>
+                            <div class="mt-8 border-t pt-6">
+                                <h4 class="text-xl font-semibold mb-4">如果您目前還無法做決定，是否還需要更多協助？</h4>
+                                <div class="space-y-3">
+                                    <label class="flex items-center"><input type="checkbox" id="talk-doctor" class="h-5 w-5 rounded"><span class="ml-3 text-lg">我想再與我的主治醫師討論我的決定。</span></label>
+                                    <label class="flex items-center"><input type="checkbox" id="talk-others" class="h-5 w-5 rounded"><span class="ml-3 text-lg">我想再與其他人(包含配偶、家人、朋友等)討論我的決定。</span></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 border-t pt-6">
+                        <h4 class="text-xl font-semibold mb-4">還有其他想了解或想問醫師的問題嗎？</h4>
+                        <p class="text-gray-600 mb-2 text-sm">您可以將問題記錄在這裡，方便回診時與醫師討論。</p>
+                        <textarea id="additional-questions" name="additional-questions" rows="3" class="w-full p-3 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="請在此輸入您的問題..."></textarea>
+                    </div>
+                </div>
+                <div class="text-center mt-12">
+                    <button id="export-btn" class="bg-gray-700 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-gray-800 transition-transform transform hover:scale-105 shadow-lg">
+                        匯出我的決策單
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <section id="summary-page" class="hidden bg-white p-8 md:p-12">
+        <!-- Summary content will be injected here -->
+    </section>
+
+    <audio id="tts-audio-player" class="hidden"></audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Global Variables ---
+            const ttsButtons = document.querySelectorAll('.tts-button');
+            const audioPlayer = document.getElementById('tts-audio-player');
+            let currentPlayingButton = null;
+            const API_KEY = ""; // Injected by environment
+            const TTS_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${API_KEY}`;
+
+            // --- Smooth Scrolling Logic ---
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // --- Part 3 Logic ---
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTab = button.dataset.tab;
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    tabContents.forEach(content => {
+                        content.id === `${targetTab}-content` ? content.classList.remove('hidden') : content.classList.add('hidden');
+                    });
+                });
+            });
+
+            const haTypeButtons = document.querySelectorAll('.ha-type-button');
+            const haDetailsContainer = document.getElementById('ha-details');
+            const haComparisonContainer = document.getElementById('ha-comparison');
+
+            const haData = {
+                low: {療程: "每半年3-5次<br><span>每次間隔一週</span>", 方便度: "較麻煩<br><span>(須多次往返)</span>", 疼痛程度: "較輕微", 花費: "約 6,000元/年"},
+                high: {療程: "每半年1次<br><span>或每年1次</span>", 方便度: "較方便", 疼痛程度: "較疼痛", 花費: "約 8,000元/年"}
+            };
+            function updateHaDetails(type) {
+                const data = haData[type];
+                haDetailsContainer.innerHTML = `<div><p class="font-bold text-gray-600 mb-1">建議療程</p><p class="text-blue-600 font-semibold">${data.療程}</p></div><div><p class="font-bold text-gray-600 mb-1">療程方便度</p><p class="text-blue-600 font-semibold">${data.方便度}</p></div><div><p class="font-bold text-gray-600 mb-1">注射疼痛程度</p><p class="text-blue-600 font-semibold">${data.疼痛程度}</p></div><div><p class="font-bold text-gray-600 mb-1">治療花費</p><p class="text-blue-600 font-semibold">${data.花費}</p></div>`;
+            }
+
+            function updateHaComparison() {
+                const low = haData.low;
+                const high = haData.high;
+                const criteria = [
+                    { name: '建議療程', low: low.療程, high: high.療程 },
+                    { name: '療程方便度', low: low.方便度, high: high.方便度 },
+                    { name: '注射疼痛程度', low: low.疼痛程度, high: high.疼痛程度 },
+                    { name: '治療花費', low: low.花費, high: high.花費 }
+                ];
+                let tableHtml = `<table class="w-full text-center border-collapse">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="p-3 font-semibold text-left border border-gray-300">比較項目</th>
+                            <th class="p-3 font-semibold text-blue-700 border border-gray-300">低分子量</th>
+                            <th class="p-3 font-semibold text-blue-700 border border-gray-300">高分子量</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                criteria.forEach(c => {
+                    tableHtml += `
+                        <tr class="border-b">
+                            <td class="p-3 font-medium text-left border border-gray-300">${c.name}</td>
+                            <td class="p-3 border border-gray-300">${c.low}</td>
+                            <td class="p-3 border border-gray-300">${c.high}</td>
+                        </tr>
+                    `;
+                });
+                tableHtml += '</tbody></table>';
+                haComparisonContainer.innerHTML = tableHtml;
+            }
+
+            haTypeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const type = button.dataset.haType;
+                    haTypeButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    if (type === 'compare') {
+                        haDetailsContainer.classList.add('hidden');
+                        haComparisonContainer.classList.remove('hidden');
+                        updateHaComparison();
+                    } else {
+                        haComparisonContainer.classList.add('hidden');
+                        haDetailsContainer.classList.remove('hidden');
+                        updateHaDetails(type);
+                    }
+                });
+            });
+            updateHaDetails('low');
+
+            // --- Part 4 Logic ---
+            function createPersonIcon(isHighlighted = false) {
+                const svgNS = "http://www.w3.org/2000/svg";
+                const svg = document.createElementNS(svgNS, "svg");
+                svg.setAttribute("class", `person-icon w-4 h-4 text-gray-400 ${isHighlighted ? 'highlight' : ''}`);
+                svg.setAttribute("viewBox", "0 0 20 20");
+                svg.setAttribute("fill", "currentColor");
+                const path = document.createElementNS(svgNS, "path");
+                path.setAttribute("fill-rule", "evenodd");
+                path.setAttribute("d", "M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z");
+                path.setAttribute("clip-rule", "evenodd");
+                svg.appendChild(path);
+                return svg;
+            }
+            function populateRisk(containerId, total, risk) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                container.innerHTML = '';
+                const displayTotal = Math.min(total, 50); 
+                for (let i = 0; i < displayTotal; i++) {
+                    container.appendChild(createPersonIcon(i < risk));
+                }
+            }
+            populateRisk('ha-high-risk', 16, 1);
+            populateRisk('ha-low-risk', 30, 1);
+            populateRisk('prp-risk', 8, 1);
+            populateRisk('combo-risk', 35, 1);
+            
+            // --- Part 5 Logic (Drag & Drop Algorithm) ---
+            const draggableContainer = document.getElementById('draggable-container');
+            const showRecommendationBtn = document.getElementById('show-recommendation-btn');
+            const recommendationOutput = document.getElementById('recommendation-output');
+            const recommendationText = document.getElementById('recommendation-text');
+            const recommendationMessage = document.getElementById('recommendation-message');
+            let draggingElement = null;
+
+            draggableContainer.addEventListener('dragstart', e => {
+                if (e.target.classList.contains('draggable')) {
+                    draggingElement = e.target;
+                    setTimeout(() => e.target.classList.add('dragging'), 0);
+                }
+            });
+
+            draggableContainer.addEventListener('dragend', e => {
+                if (draggingElement) {
+                    draggingElement.classList.remove('dragging');
+                    draggingElement = null;
+                }
+            });
+
+            draggableContainer.addEventListener('dragover', e => {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(draggableContainer, e.clientY);
+                const currentDraggable = document.querySelector('.dragging');
+                if (currentDraggable) {
+                    if (afterElement == null) {
+                        draggableContainer.appendChild(currentDraggable);
+                    } else {
+                        draggableContainer.insertBefore(currentDraggable, afterElement);
+                    }
+                }
+            });
+
+            function getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.draggable:not(.dragging)')];
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+            
+            function calculateRecommendation(ranks) {
+                const [p1, p2, p3, p4] = ranks;
+                const treatments = {
+                    PRP_HA: "玻尿酸合併PRP",
+                    PRP: "高濃度血小板血漿 (PRP)",
+                    HMWHA: "高分子量玻尿酸",
+                    LMWHA: "低分子量玻尿酸"
+                };
+                let recommendation = "";
+                let message = null;
+                const specialMessage = "由於您最在意的項目為「效果持久」，PRP或玻尿酸合併PRP是最適合的選擇。這兩個選項都要抽血製備，我們已參考您的其他偏好給您合適的建議。";
+
+                switch (p1) {
+                    case 'W1': // Type 1: 持久
+                        if (ranks.slice(1, 4).includes('W2')) {
+                            message = specialMessage;
+                        }
+                        if (p2 === 'W4') { recommendation = treatments.PRP_HA; }
+                        else if (p2 === 'W5') { recommendation = treatments.PRP; }
+                        else if (p2 === 'W2' || p2 === 'W3') {
+                            if (p3 === 'W4') { recommendation = treatments.PRP_HA; }
+                            else if (p3 === 'W5') { recommendation = treatments.PRP; }
+                            else if (p3 === 'W2' || p3 === 'W3') {
+                                if (p4 === 'W4') { recommendation = treatments.PRP_HA; }
+                                else if (p4 === 'W5') { recommendation = treatments.PRP; }
+                                else { recommendation = `${treatments.PRP} 或 ${treatments.PRP_HA}`; }
+                            } else { recommendation = `${treatments.PRP} 或 ${treatments.PRP_HA}`; }
+                        } else { recommendation = `${treatments.PRP} 或 ${treatments.PRP_HA}`; }
+                        break;
+
+                    case 'W2': // Type 2: 抽血
+                        if (p2 === 'W3') { recommendation = treatments.HMWHA; }
+                        else if (p2 === 'W4' || p2 === 'W5') { recommendation = treatments.LMWHA; }
+                        else if (p2 === 'W1') {
+                            if (p3 === 'W3') { recommendation = treatments.HMWHA; }
+                            else if (p3 === 'W4' || p3 === 'W5') { recommendation = treatments.LMWHA; }
+                             else { recommendation = `${treatments.HMWHA} 或 ${treatments.LMWHA}`; }
+                        } else { recommendation = `${treatments.HMWHA} 或 ${treatments.LMWHA}`; }
+                        break;
+
+                    case 'W3': // Type 3: 回診
+                        if (p2 === 'W2' || p2 === 'W5') { recommendation = treatments.HMWHA; }
+                        else if (p2 === 'W4') { recommendation = treatments.PRP_HA; }
+                        else if (p2 === 'W1') {
+                            if (p3 === 'W4') { recommendation = treatments.PRP_HA; }
+                            else if (p3 === 'W5') { recommendation = treatments.PRP; }
+                            else if (p3 === 'W2') {
+                                if (p4 === 'W4') { recommendation = treatments.PRP_HA; }
+                                else if (p4 === 'W5') { recommendation = treatments.PRP; }
+                                else { recommendation = `${treatments.PRP} 或 ${treatments.PRP_HA}`; }
+                            } else { recommendation = `${treatments.PRP} 或 ${treatments.PRP_HA}`; }
+                        } else { recommendation = `${treatments.HMWHA}, ${treatments.PRP}, 或 ${treatments.PRP_HA}`; }
+                        break;
+
+                    case 'W4': // Type 4: 副作用
+                        if (p2 === 'W1' || p2 === 'W3') { recommendation = treatments.PRP_HA; }
+                        else if (p2 === 'W2' || p2 === 'W5') { recommendation = treatments.LMWHA; }
+                        else { recommendation = `${treatments.PRP_HA} 或 ${treatments.LMWHA}`; }
+                        break;
+
+                    case 'W5': // Type 5: 經濟
+                        if (p2 === 'W3') { recommendation = treatments.HMWHA; }
+                        else if (p2 === 'W4') { recommendation = treatments.LMWHA; }
+                        else if (p2 === 'W1' || p2 === 'W2') {
+                            if (p3 === 'W3') { recommendation = treatments.HMWHA; }
+                            else if (p3 === 'W4') { recommendation = treatments.LMWHA; }
+                            else if (p3 === 'W1' || p3 === 'W2') {
+                                if (p4 === 'W3') { recommendation = treatments.HMWHA; }
+                                else if (p4 === 'W4') { recommendation = treatments.LMWHA; }
+                                else { recommendation = `${treatments.HMWHA} 或 ${treatments.LMWHA}`; }
+                            } else { recommendation = `${treatments.HMWHA} 或 ${treatments.LMWHA}`; }
+                        } else { recommendation = `${treatments.HMWHA} 或 ${treatments.LMWHA}`; }
+                        break;
+                        
+                    default:
+                        recommendation = "請完成排序以獲得建議。";
+                }
+                return { recommendation, message };
+            }
+
+            showRecommendationBtn.addEventListener('click', () => {
+                const orderedDraggables = [...draggableContainer.querySelectorAll('.draggable')];
+                const ranks = orderedDraggables.map(item => item.dataset.key);
+                
+                const result = calculateRecommendation(ranks);
+                
+                let recommendationHtml = `根據您的偏好排序，建議您可以優先考慮：<br><span class="text-2xl text-green-700">${result.recommendation}</span>`;
+                recommendationText.innerHTML = recommendationHtml;
+
+                if (result.message) {
+                    recommendationMessage.textContent = result.message;
+                    recommendationMessage.classList.remove('hidden');
+                } else {
+                    recommendationMessage.classList.add('hidden');
+                }
+
+                recommendationOutput.classList.remove('hidden');
+            });
+
+            // --- Part 6: Knowledge Check (NEW ORDER) ---
+            const knowledgeItems = document.querySelectorAll('.knowledge-item');
+            const explanations = [
+                "退化性膝關節炎主因為關節軟骨磨損，軟骨受損是不可逆，症狀會隨時間逐漸惡化，積極治療僅可以緩解症狀、維持基本功能。",
+                "高分子量玻尿酸相較於低分子量玻尿酸，雖然可以減少回診打針次數，但在注射部位疼痛的發生機會較高，短暫的注射部位疼痛通常較嚴重。",
+                "使用玻尿酸治療的疼痛改善效果，在施打後6個月時有86-91% 機會達大幅改善。然而，到了12個月時效果減弱，只有 52-72%機會維持輕至中等改善。",
+                "PRP或玻尿酸合併PRP，在施打後6至12個月都還可以有93%的機會維持大幅改善，較玻尿酸更疼痛改善效果更持久。",
+                "製備PRP會需要抽取病人的少量靜脈血，離心濃縮後，再回注膝關節內。"
+            ];
+
+            knowledgeItems.forEach((item, index) => {
+                const buttons = item.querySelectorAll('.check-btn');
+                const explanationDiv = item.querySelector('.explanation-text');
+                
+                buttons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        buttons.forEach(btn => btn.classList.remove('selected'));
+                        button.classList.add('selected');
+
+                        if (button.textContent.includes('不太確定')) {
+                            explanationDiv.textContent = explanations[index];
+                            explanationDiv.classList.remove('hidden');
+                        } else {
+                            explanationDiv.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            // --- Part 7 Logic (NEW ID) ---
+            const finalChoiceRadios = document.querySelectorAll('input[name="final-choice"]');
+            const haSubOptions = document.getElementById('ha-sub-options');
+            const unsureOptions = document.getElementById('unsure-options');
+
+            finalChoiceRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    // Handle HA sub-options
+                    if (radio.value === 'ha' && radio.checked) {
+                        haSubOptions.classList.remove('hidden');
+                    } else {
+                        haSubOptions.classList.add('hidden');
+                    }
+                    // Handle Unsure options
+                    if (radio.value === 'unsure' && radio.checked) {
+                        unsureOptions.classList.remove('hidden');
+                    } else {
+                        unsureOptions.classList.add('hidden');
+                    }
+                });
+            });
+            // Initial check for unsure options
+            if (document.querySelector('input[name="final-choice"][value="unsure"]').checked) {
+                unsureOptions.classList.remove('hidden');
+            } else {
+                unsureOptions.classList.add('hidden');
+            }
+
+            document.getElementById('export-btn').addEventListener('click', () => {
+                generateSummary();
+            });
+
+            function generateSummary() {
+                const mainContent = document.getElementById('main-content');
+                const summaryPage = document.getElementById('summary-page');
+
+                // 1. Preliminary Choice
+                const preliminaryChoiceInput = document.querySelector('input[name="preliminary-choice"]:checked');
+                const preliminaryChoiceValue = preliminaryChoiceInput ? preliminaryChoiceInput.labels[0].textContent.trim() : '未選擇';
+
+                // 2. Considerations and Recommendation
+                const orderedConsiderations = [...draggableContainer.querySelectorAll('.draggable')].map((item, index) => {
+                    return `<div class="bg-white p-3 rounded-md shadow-sm border-l-4 border-gray-300">
+                                <span class="font-semibold text-gray-500">第 ${index + 1} 順位:</span> 
+                                <span class="ml-2">${item.querySelector('span.text-xl').textContent.trim()}</span>
+                            </div>`;
+                }).join('');
+                const recommendationResult = recommendationText.innerHTML;
+                const recommendationMsg = recommendationMessage.classList.contains('hidden') ? '' : `<div class="mt-2 text-sm text-yellow-800 bg-yellow-100 p-2 rounded-md">${recommendationMessage.textContent}</div>`;
+
+                // 3. Knowledge Check
+                const unsureQuestions = [...knowledgeItems].filter(item => {
+                    const selectedBtn = item.querySelector('.check-btn.selected');
+                    return selectedBtn && selectedBtn.textContent.includes('不太確定');
+                }).map((item, index) => {
+                    const question = item.querySelector('p').textContent.trim();
+                    const answer = explanations[index];
+                    return `<div class="bg-white p-4 rounded-md shadow-sm">
+                                <p class="font-semibold text-gray-700">${question}</p>
+                                <p class="mt-2 text-sm text-yellow-900">說明：${answer}</p>
+                            </div>`;
+                }).join('');
+
+                // 4. Final Decision
+                const finalChoiceInput = document.querySelector('input[name="final-choice"]:checked');
+                let finalDecisionHtml = '未選擇';
+                if(finalChoiceInput) {
+                    let finalChoiceValue = finalChoiceInput.labels[0].textContent.trim();
+                    if (finalChoiceValue === '關節潤滑保護製劑 (玻尿酸)') {
+                        const haTypeInput = document.querySelector('input[name="ha-type"]:checked');
+                        const haTypeValue = haTypeInput ? haTypeInput.labels[0].textContent.trim() : '未選擇分子量';
+                        finalChoiceValue += ` (${haTypeValue})`;
+                    }
+                    if (finalChoiceValue === '目前還無法決定') {
+                        const reason = document.getElementById('unsure-reason').value;
+                        const talkDoctor = document.getElementById('talk-doctor').checked;
+                        const talkOthers = document.getElementById('talk-others').checked;
+                        finalChoiceValue += reason ? `<div class="text-sm font-normal text-gray-600 mt-2 p-2 bg-gray-100 rounded-md">原因：${reason}</div>` : '';
+                        let helpNeeded = '';
+                        if(talkDoctor) helpNeeded += '<li>想再與我的主治醫師討論我的決定。</li>';
+                        if(talkOthers) helpNeeded += '<li>我想再與其他人(包含配偶、家人、朋友等)討論我的決定。</li>';
+                        if(helpNeeded) finalChoiceValue += `<div class="text-sm font-normal text-gray-600 mt-2">需要更多協助：<ul class="list-disc list-inside">${helpNeeded}</ul></div>`;
+                    }
+                    finalDecisionHtml = finalChoiceValue;
+                }
+
+                // 5. Additional Questions
+                const additionalQuestions = document.getElementById('additional-questions').value;
+
+                const summaryHtml = `
+                    <div class="max-w-4xl mx-auto">
+                        <h1 class="text-4xl font-bold text-center text-blue-600 mb-6">我的決策結果</h1>
+                        <p class="text-center text-gray-600 mb-10">以下是決策結果摘要，請列印此頁，或使用手機截圖功能紀錄，以便回診時與醫師討論您的最終選擇。</p>
+                        
+                        <div class="space-y-8">
+                            <div class="border-2 border-blue-600 rounded-xl p-6 shadow-lg">
+                                <h2 class="text-2xl font-bold mb-4 text-blue-800">您的最終決定</h2>
+                                <p class="text-xl text-gray-800 font-semibold mb-6">${finalDecisionHtml}</p>
+                                <h2 class="text-2xl font-bold mb-4 text-blue-800">其他想了解或想問醫師的問題</h2>
+                                <p class="text-gray-600 whitespace-pre-wrap">${additionalQuestions || '無'}</p>
+                            </div>
+
+                            <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                                <h2 class="text-2xl font-bold mb-3 text-gray-800">您的初始治療偏好</h2>
+                                <p class="text-lg text-blue-700 font-semibold">${preliminaryChoiceValue}</p>
+                            </div>
+
+                            <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                                <h2 class="text-2xl font-bold mb-3 text-gray-800">您的考量順序與個人化建議</h2>
+                                <h3 class="text-lg font-semibold mb-2">您的考量順序：</h3>
+                                <div class="space-y-2 mb-4">${orderedConsiderations}</div>
+                                <h3 class="text-lg font-semibold mb-2">個人化建議：</h3>
+                                <div class="p-4 bg-green-50 rounded-md">${recommendationResult}</div>
+                                ${recommendationMsg}
+                            </div>
+
+                            <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                                <h2 class="text-2xl font-bold mb-3 text-gray-800">您還不太確定的資訊</h2>
+                                ${unsureQuestions ? `<div class="space-y-3">${unsureQuestions}</div>` : '<p class="text-gray-600">您已了解所有的關鍵資訊。</p>'}
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-12 space-x-4 no-print">
+                            <button id="back-to-tool-btn" class="bg-gray-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-gray-600 transition">返回修改</button>
+                            <button id="print-summary-btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-blue-700 transition">🖨️ 列印此頁</button>
+                        </div>
+                    </div>
+                `;
+                
+                summaryPage.innerHTML = summaryHtml;
+                mainContent.classList.add('hidden');
+                summaryPage.classList.remove('hidden');
+                window.scrollTo(0, 0);
+
+                document.getElementById('print-summary-btn').addEventListener('click', () => window.print());
+                document.getElementById('back-to-tool-btn').addEventListener('click', () => {
+                    mainContent.classList.remove('hidden');
+                    summaryPage.classList.add('hidden');
+                });
+            }
+
+
+            // --- TTS Feature ---
+            async function withExponentialBackoff(apiCallFunction, maxRetries = 5) {
+                let delay = 1000;
+                for (let i = 0; i < maxRetries; i++) {
+                    try { return await apiCallFunction(); } catch (error) {
+                        if (i === maxRetries - 1) throw error;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2;
+                    }
+                }
+            }
+            function base64ToArrayBuffer(base64) {
+                const binaryString = window.atob(base64);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) { bytes[i] = binaryString.charCodeAt(i); }
+                return bytes.buffer;
+            }
+            function pcmToWav(pcmData, sampleRate) {
+                const numChannels = 1, bitsPerSample = 16, byteRate = sampleRate * numChannels * bitsPerSample / 8, blockAlign = numChannels * bitsPerSample / 8, dataSize = pcmData.length * 2, buffer = new ArrayBuffer(44 + dataSize);
+                const view = new DataView(buffer);
+                function writeString(view, offset, string) { for (let i = 0; i < string.length; i++) { view.setUint8(offset + i, string.charCodeAt(i)); } }
+                writeString(view, 0, 'RIFF'); view.setUint32(4, 36 + dataSize, true); writeString(view, 8, 'WAVE'); writeString(view, 12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, numChannels, true); view.setUint32(24, sampleRate, true); view.setUint32(28, byteRate, true); view.setUint16(32, blockAlign, true); view.setUint16(34, bitsPerSample, true); writeString(view, 36, 'data'); view.setUint32(40, dataSize, true);
+                const pcm16 = new Int16Array(pcmData);
+                for (let i = 0; i < pcm16.length; i++) { view.setInt16(44 + i * 2, pcm16[i], true); }
+                return new Blob([view], { type: 'audio/wav' });
+            }
+            async function handleTTS(button) {
+                if (currentPlayingButton) {
+                    audioPlayer.pause(); audioPlayer.currentTime = 0;
+                    currentPlayingButton.classList.remove('playing'); currentPlayingButton.innerHTML = '🔊';
+                    if (currentPlayingButton === button) { currentPlayingButton = null; return; }
+                }
+                const sectionId = button.dataset.sectionId;
+                const section = document.getElementById(sectionId);
+                if (!section) return;
+                let textToRead = '';
+                if (sectionId === 'treatment-options-content') {
+                     const visibleContent = section.querySelector('.tab-content:not(.hidden)');
+                     if(visibleContent) textToRead = visibleContent.innerText.trim();
+                } else { textToRead = section.innerText.trim(); }
+                if (!textToRead) return;
+                currentPlayingButton = button;
+                button.innerHTML = '<div class="loader !w-6 !h-6 !border-t-blue-500"></div>';
+                try {
+                    const payload = { model: "gemini-2.5-flash-preview-tts", contents: [{ parts: [{ text: textToRead }] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zubenelgenubi" } } } } };
+                    const apiCall = async () => {
+                        const response = await fetch(TTS_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                        if (!response.ok) throw new Error(`API responded with status: ${response.status}`);
+                        return response.json();
+                    };
+                    const result = await withExponentialBackoff(apiCall);
+                    const part = result?.candidates?.[0]?.content?.parts?.[0];
+                    const audioData = part?.inlineData?.data;
+                    const mimeType = part?.inlineData?.mimeType;
+                    if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                        const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                        const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
+                        const pcmData = base64ToArrayBuffer(audioData);
+                        const pcm16 = new Int16Array(pcmData);
+                        const wavBlob = pcmToWav(pcm16, sampleRate);
+                        const audioUrl = URL.createObjectURL(wavBlob);
+                        audioPlayer.src = audioUrl; audioPlayer.play();
+                        button.innerHTML = '⏹️'; button.classList.add('playing');
+                    } else { throw new Error("Invalid audio data received from API."); }
+                } catch (error) {
+                    console.error("TTS Error:", error);
+                    button.innerHTML = '⚠️'; currentPlayingButton = null;
+                }
+            }
+            ttsButtons.forEach(button => { button.addEventListener('click', () => handleTTS(button)); });
+            audioPlayer.onended = () => {
+                if (currentPlayingButton) {
+                    currentPlayingButton.classList.remove('playing'); currentPlayingButton.innerHTML = '🔊';
+                    currentPlayingButton = null;
+                }
+            };
+        });
+    </script>
+</body>
+</html>
